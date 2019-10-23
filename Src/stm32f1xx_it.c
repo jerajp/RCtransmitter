@@ -42,7 +42,18 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+uint32_t T1statuschange=0;
+uint32_t T2statuschange=0;
+uint32_t T3statuschange=0;
+uint32_t T4statuschange=0;
+uint32_t T1status=0;
+uint32_t T2status=0;
+uint32_t T3status=0;
+uint32_t T4status=0;
+uint32_t T1count=0;
+uint32_t T2count=0;
+uint32_t T3count=0;
+uint32_t T4count=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -187,6 +198,61 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
+  //Read push-buttons, internal pull-up, switch to GND
+  T1status=!HAL_GPIO_ReadPin(T1_GPIO_Port,T1_Pin);
+  T2status=!HAL_GPIO_ReadPin(T2_GPIO_Port,T2_Pin);
+  T3status=!HAL_GPIO_ReadPin(T3_GPIO_Port,T3_Pin);
+  T4status=!HAL_GPIO_ReadPin(T4_GPIO_Port,T4_Pin);
+
+  //INTERPRET BUTTONS-----------------------------------------
+
+  //Set flag on T1 press
+  if(T1status==1)
+  {
+	  T1count++;
+  }
+  else T1count=0;
+
+  if(T1count==BUTTONTHRESHOLD)
+  {
+	  T1statuschange=1;
+  }
+
+  //Set flag on T2 press
+  if(T2status==1)
+  {
+	  T2count++;
+  }
+  else T2count=0;
+
+  if(T2count==BUTTONTHRESHOLD)
+  {
+	  T2statuschange=1;
+  }
+
+  //Set flag on T3 press
+  if(T3status==1)
+  {
+	  T3count++;
+  }
+  else T3count=0;
+
+  if(T3count==BUTTONTHRESHOLD)
+  {
+	  T3statuschange=1;
+  }
+
+  //Set flag on T4 press
+  if(T4status==1)
+  {
+	  T4count++;
+  }
+  else T4count=0;
+
+  if(T4count==BUTTONTHRESHOLD)
+  {
+	  T4statuschange=1;
+  }
   /* USER CODE END SysTick_IRQn 1 */
 }
 

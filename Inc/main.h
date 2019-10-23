@@ -32,7 +32,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -42,7 +43,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define BUTTONTHRESHOLD 10
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -84,12 +85,16 @@ void Error_Handler(void);
 #define CPI_NR24_CSN_GPIO_Port GPIOB
 #define TOGG2_Pin GPIO_PIN_11
 #define TOGG2_GPIO_Port GPIOB
-#define TOGG1_Pin GPIO_PIN_12
-#define TOGG1_GPIO_Port GPIOB
-#define SPI_CE_LCD_Pin GPIO_PIN_14
-#define SPI_CE_LCD_GPIO_Port GPIOB
-#define LCDCOMAND_Pin GPIO_PIN_8
-#define LCDCOMAND_GPIO_Port GPIOA
+#define LCD_RST_Pin GPIO_PIN_12
+#define LCD_RST_GPIO_Port GPIOB
+#define LCD_CLK_Pin GPIO_PIN_13
+#define LCD_CLK_GPIO_Port GPIOB
+#define LCD_CE_Pin GPIO_PIN_14
+#define LCD_CE_GPIO_Port GPIOB
+#define LCD_DATA_Pin GPIO_PIN_15
+#define LCD_DATA_GPIO_Port GPIOB
+#define LCD_COMM_Pin GPIO_PIN_8
+#define LCD_COMM_GPIO_Port GPIOA
 #define T1_Pin GPIO_PIN_9
 #define T1_GPIO_Port GPIOA
 #define T2_Pin GPIO_PIN_10
@@ -98,8 +103,8 @@ void Error_Handler(void);
 #define T3_GPIO_Port GPIOA
 #define T4_Pin GPIO_PIN_12
 #define T4_GPIO_Port GPIOA
-#define BUZZER_Pin GPIO_PIN_4
-#define BUZZER_GPIO_Port GPIOB
+#define TOGG1_Pin GPIO_PIN_4
+#define TOGG1_GPIO_Port GPIOB
 #define LED_4_Pin GPIO_PIN_5
 #define LED_4_GPIO_Port GPIOB
 #define LED3_Pin GPIO_PIN_8

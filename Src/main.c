@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "nokia5110_LCD.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,10 +47,26 @@ ADC_HandleTypeDef hadc1;
 I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
-SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
+uint32_t test1;
+uint32_t test2;
 
+char stringlcd1[20];
+char stringlcd2[20];
+char stringlcd3[20];
+char stringlcd4[20];
+char stringlcd5[20];
+char stringlcd6[20];
+char stringlcd7[20];
+char stringlcd8[20];
+char stringlcd9[20];
+char stringlcd10[20];
+
+extern uint32_t T1status;
+extern uint32_t T2status;
+extern uint32_t T3status;
+extern uint32_t T4status;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,7 +75,6 @@ static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -77,6 +92,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
+	//test timings DWT counter
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= 1;
   /* USER CODE END 1 */
   
 
@@ -101,8 +119,16 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+
+  //lcd init pins
+  LCD_setRST(LCD_RST_GPIO_Port, LCD_RST_Pin);
+  LCD_setCE(LCD_CE_GPIO_Port, LCD_CE_Pin);
+  LCD_setDC(LCD_COMM_GPIO_Port, LCD_COMM_Pin);
+  LCD_setDIN(LCD_DATA_GPIO_Port, LCD_DATA_Pin);
+  LCD_setCLK(LCD_CLK_GPIO_Port, LCD_CLK_Pin);
+
+  LCD_init(); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
 
   /* USER CODE END 2 */
 
@@ -110,7 +136,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+	  test1=DWT->CYCCNT;
+	  sprintf(stringlcd1,"Bstat: %u %u %u %u",T1status,T2status,T3status,T4status);
+	  LCD_print(stringlcd1,0,0);
+	  test2=DWT->CYCCNT-test1;
+
+	  sprintf(stringlcd2,"Test: %u",test2);
+	  LCD_print(stringlcd2,0,5);
+	/* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -129,10 +162,13 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -141,17 +177,17 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -260,7 +296,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -272,44 +308,6 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
-
-}
-
-/**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
 
 }
 
@@ -332,11 +330,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|SPI_CE_LCD_Pin|BUZZER_Pin 
-                          |LED_4_Pin|LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LCD_CLK_Pin 
+                          |LCD_CE_Pin|LCD_DATA_Pin|LED_4_Pin|LED3_Pin 
+                          |LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LCDCOMAND_GPIO_Port, LCDCOMAND_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_COMM_GPIO_Port, LCD_COMM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED1_Pin */
   GPIO_InitStruct.Pin = LED1_Pin;
@@ -351,10 +350,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin SPI_CE_LCD_Pin BUZZER_Pin 
-                           LED_4_Pin LED3_Pin LED2_Pin */
-  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|SPI_CE_LCD_Pin|BUZZER_Pin 
-                          |LED_4_Pin|LED3_Pin|LED2_Pin;
+  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED_4_Pin 
+                           LED3_Pin LED2_Pin */
+  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED_4_Pin 
+                          |LED3_Pin|LED2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -366,17 +365,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LCDCOMAND_Pin */
-  GPIO_InitStruct.Pin = LCDCOMAND_Pin;
+  /*Configure GPIO pins : LCD_CLK_Pin LCD_CE_Pin LCD_DATA_Pin */
+  GPIO_InitStruct.Pin = LCD_CLK_Pin|LCD_CE_Pin|LCD_DATA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LCDCOMAND_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LCD_COMM_Pin */
+  GPIO_InitStruct.Pin = LCD_COMM_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(LCD_COMM_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : T1_Pin T2_Pin T3_Pin T4_Pin */
   GPIO_InitStruct.Pin = T1_Pin|T2_Pin|T3_Pin|T4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
