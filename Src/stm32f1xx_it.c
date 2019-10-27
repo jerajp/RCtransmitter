@@ -42,18 +42,36 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-uint32_t T1statuschange=0;
-uint32_t T2statuschange=0;
-uint32_t T3statuschange=0;
-uint32_t T4statuschange=0;
+uint32_t T1statusdebounce=0;
+uint32_t T2statusdebounce=0;
+uint32_t T3statusdebounce=0;
+uint32_t T4statusdebounce=0;
+
 uint32_t T1status=0;
 uint32_t T2status=0;
 uint32_t T3status=0;
 uint32_t T4status=0;
+
 uint32_t T1count=0;
 uint32_t T2count=0;
 uint32_t T3count=0;
 uint32_t T4count=0;
+
+uint32_t TDstatusdebounce=0;
+uint32_t TLstatusdebounce=0;
+uint32_t TOGGLstatusdebounce=0;
+uint32_t TOGGDstatusdebounce=0;
+
+uint32_t TDstatus=0;
+uint32_t TLstatus=0;
+uint32_t TOGGLstatus=0;
+uint32_t TOGGDstatus=0;
+
+uint32_t TDcount=0;
+uint32_t TLcount=0;
+uint32_t TOGGLcount=0;
+uint32_t TOGGDcount=0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -203,7 +221,10 @@ void SysTick_Handler(void)
   T2status=!HAL_GPIO_ReadPin(T2_GPIO_Port,T2_Pin);
   T3status=!HAL_GPIO_ReadPin(T3_GPIO_Port,T3_Pin);
   T4status=!HAL_GPIO_ReadPin(T4_GPIO_Port,T4_Pin);
-
+  TDstatus=!HAL_GPIO_ReadPin(DT_GPIO_Port,DT_Pin);
+  TLstatus=!HAL_GPIO_ReadPin(LT_GPIO_Port,LT_Pin);
+  TOGGLstatus=!HAL_GPIO_ReadPin(TOGGL_GPIO_Port,TOGGL_Pin);
+  TOGGDstatus=!HAL_GPIO_ReadPin(TOGGD_GPIO_Port,TOGGD_Pin);
   //INTERPRET BUTTONS-----------------------------------------
 
   //Set flag on T1 press
@@ -211,11 +232,15 @@ void SysTick_Handler(void)
   {
 	  T1count++;
   }
-  else T1count=0;
+  else
+  {
+	  T1count=0;
+	  T1statusdebounce=0;
+  }
 
   if(T1count==BUTTONTHRESHOLD)
   {
-	  T1statuschange=1;
+	  T1statusdebounce=1;
   }
 
   //Set flag on T2 press
@@ -223,11 +248,15 @@ void SysTick_Handler(void)
   {
 	  T2count++;
   }
-  else T2count=0;
+  else
+  {
+	  T2count=0;
+	  T2statusdebounce=0;
+  }
 
   if(T2count==BUTTONTHRESHOLD)
   {
-	  T2statuschange=1;
+	  T2statusdebounce=1;
   }
 
   //Set flag on T3 press
@@ -235,11 +264,16 @@ void SysTick_Handler(void)
   {
 	  T3count++;
   }
-  else T3count=0;
+  else
+  {
+	  T3count=0;
+	  T3statusdebounce=0;
+  }
+
 
   if(T3count==BUTTONTHRESHOLD)
   {
-	  T3statuschange=1;
+	  T3statusdebounce=1;
   }
 
   //Set flag on T4 press
@@ -247,12 +281,94 @@ void SysTick_Handler(void)
   {
 	  T4count++;
   }
-  else T4count=0;
+  else
+  {
+	  T4count=0;
+	  T4statusdebounce=0;
+  }
 
   if(T4count==BUTTONTHRESHOLD)
   {
-	  T4statuschange=1;
+	  T4statusdebounce=1;
   }
+
+  //Set flag on DTpress
+  if(TDstatus==1)
+  {
+	  TDcount++;
+  }
+  else
+  {
+	  TDcount=0;
+	  TDstatusdebounce=0;
+  }
+
+  if(TDcount==BUTTONTHRESHOLD)
+  {
+	  TDstatusdebounce=1;
+  }
+
+  //Set flag on LT press
+    if(TLstatus==1)
+    {
+  	  TLcount++;
+    }
+    else
+    {
+  	  TLcount=0;
+  	  TLstatusdebounce=0;
+    }
+
+    if(TLcount==BUTTONTHRESHOLD)
+    {
+  	  TLstatusdebounce=1;
+    }
+
+    //Set flag on TOGG1 press
+      if(TOGGLstatus==1)
+      {
+    	  TOGGLcount++;
+      }
+      else
+      {
+    	  TOGGLcount=0;
+    	  TOGGLstatusdebounce=0;
+      }
+
+      if(TOGGLcount==BUTTONTHRESHOLD)
+      {
+    	  TOGGLstatusdebounce=1;
+      }
+
+      //Set flag on TOGG2 press
+        if(TOGGDstatus==1)
+        {
+      	  TOGGDcount++;
+        }
+        else
+        {
+      	  TOGGDcount=0;
+      	  TOGGDstatusdebounce=0;
+        }
+
+        if(TOGGDcount==BUTTONTHRESHOLD)
+        {
+      	  TOGGDstatusdebounce=1;
+        }
+
+     //LEDS
+     if(T1statusdebounce)LED1ON;
+     else LED1OFF;
+
+     if(T2statusdebounce)LED2ON;
+     else LED2OFF;
+
+     if(T3statusdebounce)LED3ON;
+     else LED3OFF;
+
+     if(T4statusdebounce)LED4ON;
+     else LED4OFF;
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 

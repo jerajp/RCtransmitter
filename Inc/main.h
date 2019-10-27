@@ -83,8 +83,8 @@ void Error_Handler(void);
 #define SPI_NR24_CE_GPIO_Port GPIOB
 #define CPI_NR24_CSN_Pin GPIO_PIN_10
 #define CPI_NR24_CSN_GPIO_Port GPIOB
-#define TOGG2_Pin GPIO_PIN_11
-#define TOGG2_GPIO_Port GPIOB
+#define TOGGD_Pin GPIO_PIN_11
+#define TOGGD_GPIO_Port GPIOB
 #define LCD_RST_Pin GPIO_PIN_12
 #define LCD_RST_GPIO_Port GPIOB
 #define LCD_CLK_Pin GPIO_PIN_13
@@ -103,15 +103,27 @@ void Error_Handler(void);
 #define T3_GPIO_Port GPIOA
 #define T4_Pin GPIO_PIN_12
 #define T4_GPIO_Port GPIOA
-#define TOGG1_Pin GPIO_PIN_4
-#define TOGG1_GPIO_Port GPIOB
-#define LED_4_Pin GPIO_PIN_5
-#define LED_4_GPIO_Port GPIOB
+#define TOGGL_Pin GPIO_PIN_4
+#define TOGGL_GPIO_Port GPIOB
+#define LED4_Pin GPIO_PIN_5
+#define LED4_GPIO_Port GPIOB
 #define LED3_Pin GPIO_PIN_8
 #define LED3_GPIO_Port GPIOB
 #define LED2_Pin GPIO_PIN_9
 #define LED2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
+
+#define LED1ON HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_SET)
+#define LED1OFF HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_RESET)
+
+#define LED2ON HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET)
+#define LED2OFF HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_RESET)
+
+#define LED3ON HAL_GPIO_WritePin(LED3_GPIO_Port,LED3_Pin,GPIO_PIN_SET)
+#define LED3OFF HAL_GPIO_WritePin(LED3_GPIO_Port,LED3_Pin,GPIO_PIN_RESET)
+
+#define LED4ON HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET)
+#define LED4OFF HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_RESET)
 
 /* USER CODE END Private defines */
 

@@ -63,10 +63,14 @@ char stringlcd8[20];
 char stringlcd9[20];
 char stringlcd10[20];
 
-extern uint32_t T1status;
-extern uint32_t T2status;
-extern uint32_t T3status;
-extern uint32_t T4status;
+extern uint32_t T1statusdebounce;
+extern uint32_t T2statusdebounce;
+extern uint32_t T3statusdebounce;
+extern uint32_t T4statusdebounce;
+extern uint32_t TDstatusdebounce;
+extern uint32_t TLstatusdebounce;
+extern uint32_t TOGGLstatusdebounce;
+extern uint32_t TOGGDstatusdebounce;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -137,13 +141,21 @@ int main(void)
   while (1)
   {
 	  test1=DWT->CYCCNT;
-	  sprintf(stringlcd1,"Bstat: %u %u %u %u",T1status,T2status,T3status,T4status);
+
+	  sprintf(stringlcd1,"Bstat: %u %u %u %u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce);
 	  LCD_print(stringlcd1,0,0);
+
+	  sprintf(stringlcd1,"PBstat: %u %u",TLstatusdebounce,TDstatusdebounce);
+	  LCD_print(stringlcd1,0,1);
+
+	  sprintf(stringlcd1,"TOGGstat: %u %u",TOGGLstatusdebounce,TOGGDstatusdebounce);
+	  LCD_print(stringlcd1,0,2);
+
 	  test2=DWT->CYCCNT-test1;
 
 	  sprintf(stringlcd2,"Test: %u",test2);
 	  LCD_print(stringlcd2,0,5);
-	/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -331,7 +343,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LCD_CLK_Pin 
-                          |LCD_CE_Pin|LCD_DATA_Pin|LED_4_Pin|LED3_Pin 
+                          |LCD_CE_Pin|LCD_DATA_Pin|LED4_Pin|LED3_Pin 
                           |LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -347,22 +359,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : DT_Pin LT_Pin */
   GPIO_InitStruct.Pin = DT_Pin|LT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED_4_Pin 
+  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED4_Pin 
                            LED3_Pin LED2_Pin */
-  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED_4_Pin 
+  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED4_Pin 
                           |LED3_Pin|LED2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : TOGG2_Pin TOGG1_Pin */
-  GPIO_InitStruct.Pin = TOGG2_Pin|TOGG1_Pin;
+  /*Configure GPIO pins : TOGGD_Pin TOGGL_Pin */
+  GPIO_InitStruct.Pin = TOGGD_Pin|TOGGL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LCD_CLK_Pin LCD_CE_Pin LCD_DATA_Pin */
