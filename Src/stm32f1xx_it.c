@@ -72,6 +72,17 @@ uint32_t TLcount=0;
 uint32_t TOGGLcount=0;
 uint32_t TOGGDcount=0;
 
+uint32_t BattmV=0;
+uint32_t BattmVSUM=0;
+uint32_t BattmVAVG=0;
+uint32_t Batt1cellAVG;
+uint32_t batthistindx=0;
+uint32_t BAttmVhist[BATTAVERAGETIME];
+
+uint32_t i;
+
+extern uint32_t watch1;
+extern uint16_t adcDataArray[7];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,7 +96,7 @@ uint32_t TOGGDcount=0;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -369,6 +380,28 @@ void SysTick_Handler(void)
      if(T4statusdebounce)LED4ON;
      else LED4OFF;
 
+
+     //ADC interpret
+
+     //Battery value 12k/6.8k divider-------------------------
+     BattmV=(adcDataArray[6]*3300*2.735)/4095;
+
+     //Battery average value---------------------------------
+     BAttmVhist[batthistindx]=BattmV;
+     batthistindx++;
+     if(batthistindx>=BATTAVERAGETIME)batthistindx=0;
+
+     BattmVSUM=0;
+
+     for(i=0;i<BATTAVERAGETIME;i++)
+     {
+    	 BattmVSUM+=BAttmVhist[i];
+     }
+
+     BattmVAVG=BattmVSUM/(BATTAVERAGETIME);
+     Batt1cellAVG=BattmVAVG/2; //display average voltage per 1 li-ion cell
+     //-----------------------------------------------------
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -378,6 +411,20 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 channel1 global interrupt.
+  */
+void DMA1_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+  watch1++;
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

@@ -44,6 +44,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 #define BUTTONTHRESHOLD 10
+#define BATTAVERAGETIME 50 //50 msec average
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -59,8 +60,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LED1_Pin GPIO_PIN_13
-#define LED1_GPIO_Port GPIOC
+#define LED2_Pin GPIO_PIN_13
+#define LED2_GPIO_Port GPIOC
 #define DT_Pin GPIO_PIN_14
 #define DT_GPIO_Port GPIOC
 #define LT_Pin GPIO_PIN_15
@@ -105,12 +106,12 @@ void Error_Handler(void);
 #define T4_GPIO_Port GPIOA
 #define TOGGL_Pin GPIO_PIN_4
 #define TOGGL_GPIO_Port GPIOB
-#define LED4_Pin GPIO_PIN_5
-#define LED4_GPIO_Port GPIOB
-#define LED3_Pin GPIO_PIN_8
+#define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOB
-#define LED2_Pin GPIO_PIN_9
-#define LED2_GPIO_Port GPIOB
+#define LED4_Pin GPIO_PIN_8
+#define LED4_GPIO_Port GPIOB
+#define LED1_Pin GPIO_PIN_9
+#define LED1_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 #define LED1ON HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_SET)

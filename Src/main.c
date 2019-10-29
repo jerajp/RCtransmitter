@@ -43,6 +43,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 I2C_HandleTypeDef hi2c1;
 
@@ -51,6 +52,8 @@ SPI_HandleTypeDef hspi1;
 /* USER CODE BEGIN PV */
 uint32_t test1;
 uint32_t test2;
+
+uint32_t watch1;
 
 char stringlcd1[20];
 char stringlcd2[20];
@@ -71,11 +74,16 @@ extern uint32_t TDstatusdebounce;
 extern uint32_t TLstatusdebounce;
 extern uint32_t TOGGLstatusdebounce;
 extern uint32_t TOGGDstatusdebounce;
+
+uint16_t adcDataArray[7];
+
+extern uint32_t Batt1cellAVG;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
@@ -120,10 +128,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_ADCEx_Calibration_Start(&hadc1);
+
+  HAL_ADC_Start_DMA(&hadc1,adcDataArray, 7);
 
   //lcd init pins
   LCD_setRST(LCD_RST_GPIO_Port, LCD_RST_Pin);
@@ -151,9 +164,12 @@ int main(void)
 	  sprintf(stringlcd1,"TOGGstat: %u %u",TOGGLstatusdebounce,TOGGDstatusdebounce);
 	  LCD_print(stringlcd1,0,2);
 
+	  sprintf(stringlcd1,"BmV: %u",Batt1cellAVG);
+	  LCD_print(stringlcd1,0,3);
+
 	  test2=DWT->CYCCNT-test1;
 
-	  sprintf(stringlcd2,"Test: %u",test2);
+	  sprintf(stringlcd2,"Test: %u",watch1);
 	  LCD_print(stringlcd2,0,5);
     /* USER CODE END WHILE */
 
@@ -226,12 +242,12 @@ static void MX_ADC1_Init(void)
   /** Common config 
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 7;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -240,7 +256,55 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Rank = ADC_REGULAR_RANK_4;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_REGULAR_RANK_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Rank = ADC_REGULAR_RANK_6;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = ADC_REGULAR_RANK_7;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -323,6 +387,22 @@ static void MX_SPI1_Init(void)
 
 }
 
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+}
+
 /**
   * @brief GPIO Initialization Function
   * @param None
@@ -339,22 +419,22 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LCD_CLK_Pin 
-                          |LCD_CE_Pin|LCD_DATA_Pin|LED4_Pin|LED3_Pin 
-                          |LED2_Pin, GPIO_PIN_RESET);
+                          |LCD_CE_Pin|LCD_DATA_Pin|LED3_Pin|LED4_Pin 
+                          |LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_COMM_GPIO_Port, LCD_COMM_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED1_Pin */
-  GPIO_InitStruct.Pin = LED1_Pin;
+  /*Configure GPIO pin : LED2_Pin */
+  GPIO_InitStruct.Pin = LED2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(LED2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DT_Pin LT_Pin */
   GPIO_InitStruct.Pin = DT_Pin|LT_Pin;
@@ -362,10 +442,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED4_Pin 
-                           LED3_Pin LED2_Pin */
-  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED4_Pin 
-                          |LED3_Pin|LED2_Pin;
+  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED3_Pin 
+                           LED4_Pin LED1_Pin */
+  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED3_Pin 
+                          |LED4_Pin|LED1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
