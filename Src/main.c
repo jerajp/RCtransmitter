@@ -78,6 +78,21 @@ extern uint32_t TOGGDstatusdebounce;
 uint16_t adcDataArray[7];
 
 extern uint32_t Batt1cellAVG;
+
+
+extern uint32_t LjoyUPDOWN;
+extern uint32_t LjoyLEFTRIGHT;
+extern uint32_t DjoyUPDOWN;
+extern uint32_t DjoyLEFTRIGHT;
+
+extern uint32_t offsetLjoyUPDOWN;
+extern uint32_t offsetLjoyLEFTRIGHT;
+extern uint32_t offsetDjoyUPDOWN;
+extern uint32_t offsetDjoyLEFTRIGHT;
+
+extern uint32_t potenc1;
+extern uint32_t potenc2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,6 +162,13 @@ int main(void)
 
   LCD_init(); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
 
+  //Zeroing Joysticks on startup
+  offsetLjoyUPDOWN=2047-adcDataArray[0];
+  offsetLjoyLEFTRIGHT=2047-adcDataArray[1];
+  offsetDjoyUPDOWN=2047-adcDataArray[2];
+  offsetDjoyLEFTRIGHT=2047-adcDataArray[3];
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -155,17 +177,20 @@ int main(void)
   {
 	  test1=DWT->CYCCNT;
 
-	  sprintf(stringlcd1,"Bstat: %u %u %u %u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce);
+	  sprintf(stringlcd1,"%u%u%u%u %u%u %u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
 	  LCD_print(stringlcd1,0,0);
 
-	  sprintf(stringlcd1,"PBstat: %u %u",TLstatusdebounce,TDstatusdebounce);
+	  sprintf(stringlcd1,"BmV: %u",Batt1cellAVG);
 	  LCD_print(stringlcd1,0,1);
 
-	  sprintf(stringlcd1,"TOGGstat: %u %u",TOGGLstatusdebounce,TOGGDstatusdebounce);
+	  sprintf(stringlcd1,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
 	  LCD_print(stringlcd1,0,2);
 
-	  sprintf(stringlcd1,"BmV: %u",Batt1cellAVG);
+	  sprintf(stringlcd1,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
 	  LCD_print(stringlcd1,0,3);
+
+	  sprintf(stringlcd1,"%u %u    ",potenc1,potenc2);
+	  LCD_print(stringlcd1,0,4);
 
 	  test2=DWT->CYCCNT-test1;
 

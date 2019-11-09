@@ -81,6 +81,28 @@ uint32_t BAttmVhist[BATTAVERAGETIME];
 
 uint32_t i;
 
+uint32_t LjoyUPDOWN=0;
+uint32_t LjoyLEFTRIGHT=0;
+uint32_t DjoyUPDOWN=0;
+uint32_t DjoyLEFTRIGHT=0;
+
+int32_t offsetLjoyUPDOWN=0;
+int32_t offsetLjoyLEFTRIGHT=0;
+int32_t offsetDjoyUPDOWN=0;
+int32_t offsetDjoyLEFTRIGHT=0;
+
+int32_t LjoyUPDOWNzeroOffset;
+int32_t LjoyLEFTRIGHTzeroOffset;
+int32_t DjoyUPDOWNzeroOffset;
+int32_t DjoyLEFTRIGHTzeroOffset;
+
+uint32_t potenc1=0;
+uint32_t potenc2=0;
+
+
+
+uint32_t offsetsetcount=0;
+
 extern uint32_t watch1;
 extern uint16_t adcDataArray[7];
 /* USER CODE END PV */
@@ -383,10 +405,10 @@ void SysTick_Handler(void)
 
      //ADC interpret
 
-     //Battery value 12k/6.8k divider-------------------------
+     //Battery value 12k/6.8k divider----------------------------------
      BattmV=(adcDataArray[6]*3300*2.735)/4095;
 
-     //Battery average value---------------------------------
+     //Battery average value--------------------------------------------
      BAttmVhist[batthistindx]=BattmV;
      batthistindx++;
      if(batthistindx>=BATTAVERAGETIME)batthistindx=0;
@@ -400,7 +422,54 @@ void SysTick_Handler(void)
 
      BattmVAVG=BattmVSUM/(BATTAVERAGETIME);
      Batt1cellAVG=BattmVAVG/2; //display average voltage per 1 li-ion cell
-     //-----------------------------------------------------
+
+     //Joysticks---------------------------------------------------------------
+
+     LjoyUPDOWNzeroOffset=adcDataArray[0];
+     LjoyLEFTRIGHTzeroOffset=adcDataArray[1];
+     DjoyUPDOWNzeroOffset=adcDataArray[2];
+     DjoyLEFTRIGHTzeroOffset=adcDataArray[3];
+
+     //Zeroing joysticks to center
+     if(T1statusdebounce==1 && T3statusdebounce==1)
+     {
+       offsetsetcount++;
+
+       if(offsetsetcount==5000)
+       {
+         offsetLjoyUPDOWN=2047-LjoyUPDOWNzeroOffset;
+         offsetLjoyLEFTRIGHT=2047-LjoyLEFTRIGHTzeroOffset;
+     	 offsetDjoyUPDOWN=2047-DjoyUPDOWNzeroOffset;
+     	 offsetDjoyLEFTRIGHT=2047-DjoyLEFTRIGHTzeroOffset;
+        }
+     }
+     else offsetsetcount=0;
+
+     LjoyUPDOWNzeroOffset+=offsetLjoyUPDOWN;
+     LjoyLEFTRIGHTzeroOffset+=offsetLjoyLEFTRIGHT;
+     DjoyUPDOWNzeroOffset+=offsetDjoyUPDOWN;
+     DjoyLEFTRIGHTzeroOffset+=offsetDjoyLEFTRIGHT;
+
+     if(LjoyUPDOWNzeroOffset< 0)LjoyUPDOWNzeroOffset=0;
+     if(LjoyLEFTRIGHTzeroOffset<0)LjoyLEFTRIGHTzeroOffset=0;
+     if(DjoyUPDOWNzeroOffset<0)DjoyUPDOWNzeroOffset=0;
+     if(DjoyLEFTRIGHTzeroOffset<0)DjoyLEFTRIGHTzeroOffset=0;
+
+     if(LjoyUPDOWNzeroOffset>4095)LjoyUPDOWNzeroOffset=4095;
+     if(LjoyLEFTRIGHTzeroOffset>4095)LjoyLEFTRIGHTzeroOffset=4095;
+     if(DjoyUPDOWNzeroOffset>4095)DjoyUPDOWNzeroOffset=4095;
+     if(DjoyLEFTRIGHTzeroOffset>4095)DjoyLEFTRIGHTzeroOffset=4095;
+
+     //scaling 0-100%
+     LjoyUPDOWN=LjoyUPDOWNzeroOffset*100/4095;
+     LjoyLEFTRIGHT=LjoyLEFTRIGHTzeroOffset*100/4095;
+     DjoyUPDOWN=DjoyUPDOWNzeroOffset*100/4095;
+     DjoyLEFTRIGHT=DjoyLEFTRIGHTzeroOffset*100/4095;
+
+     //Potenciometers (inverted logic-HW)---------------------------
+     potenc1=100-adcDataArray[4]*100/4095;
+	 potenc2=100-adcDataArray[5]*100/4095;
+     //-------------------------------------------------------------
 
   /* USER CODE END SysTick_IRQn 1 */
 }
