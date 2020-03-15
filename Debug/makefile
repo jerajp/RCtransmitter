@@ -32,6 +32,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 RCtransmitter.list \
 
+OBJCOPY_BIN += \
+RCtransmitter.bin \
+
 
 # All Target
 all: RCtransmitter.elf secondary-outputs
@@ -52,12 +55,17 @@ RCtransmitter.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+RCtransmitter.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "RCtransmitter.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
 .SECONDARY:

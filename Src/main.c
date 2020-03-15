@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nokia5110_LCD.h"
+#include "nrf24.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +53,8 @@ SPI_HandleTypeDef hspi1;
 /* USER CODE BEGIN PV */
 uint32_t test1;
 uint32_t test2;
-
 uint32_t watch1;
+uint32_t wifiOK;
 
 char stringlcd1[20];
 char stringlcd2[20];
@@ -93,6 +94,12 @@ extern uint32_t offsetDjoyLEFTRIGHT;
 extern uint32_t potenc1;
 extern uint32_t potenc2;
 
+
+//NRF24
+uint8_t nRF24_payloadTX[32]; //TX buffer
+uint8_t nRF24_payloadRX[32]; //RX buffer
+const uint8_t nRF24_ADDR[3] = {2, 3, 4 }; //Address
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,7 +130,6 @@ int main(void)
 	DWT->CYCCNT = 0;
 	DWT->CTRL |= 1;
   /* USER CODE END 1 */
-  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -162,7 +168,46 @@ int main(void)
 
   LCD_init(); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
 
-  //Zeroing Joysticks on startup
+  //NRF24INIT
+  SPI1->CR1|=SPI_CR1_SPE; //enable SPI
+
+  nRF24_CE_L();
+  wifiOK=nRF24_Check();
+
+  nRF24_Init(); //Default init
+
+  // Disable ShockBurst for all RX pipes
+  nRF24_DisableAA(0xFF);
+
+  // Set RF channel
+  nRF24_SetRFChannel(15); //2400Mhz + 15Mhz
+
+  // Set data rate
+  nRF24_SetDataRate(nRF24_DR_250kbps);
+
+  // Set CRC scheme
+  nRF24_SetCRCScheme(nRF24_CRC_2byte);
+
+  // Set address width, its common for all pipes (RX and TX)
+  nRF24_SetAddrWidth(3);
+
+  nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
+
+  // Set TX power
+  nRF24_SetTXPower(nRF24_TXPWR_12dBm);
+
+  // Set operational mode (PTX == transmitter)
+  nRF24_SetOperationalMode(nRF24_MODE_TX);
+
+  // Clear any pending IRQ flags
+  nRF24_ClearIRQFlags();
+
+  // Wake the transceiver
+  nRF24_SetPowerMode(nRF24_PWR_UP);
+
+
+
+  //Zeroing Joysticks on startup------------------------------------------------
   offsetLjoyUPDOWN=2047-adcDataArray[0];
   offsetLjoyLEFTRIGHT=2047-adcDataArray[1];
   offsetDjoyUPDOWN=2047-adcDataArray[2];
@@ -194,8 +239,41 @@ int main(void)
 
 	  test2=DWT->CYCCNT-test1;
 
-	  sprintf(stringlcd2,"Test: %u",watch1);
-	  LCD_print(stringlcd2,0,5);
+	  if(wifiOK)
+	  {
+		  sprintf(stringlcd2,"Wifi OK");
+		  LCD_print(stringlcd2,0,5);
+	  }
+	  else
+	  {
+		  sprintf(stringlcd2,"Wifi Fail");
+		  LCD_print(stringlcd2,0,5);
+	  }
+
+
+	  //Test--TX----------------------------------------------------------------------
+	  HAL_Delay(100);
+	  //SEND DATA TO DRONE
+	  nRF24_CE_L(); //DISABLE RX
+	  nRF24_Init();
+	  nRF24_DisableAA(0xFF);
+	  nRF24_SetRFChannel(15);//
+	  nRF24_SetDataRate(nRF24_DR_250kbps);
+	  nRF24_SetCRCScheme(nRF24_CRC_2byte);
+	  nRF24_SetAddrWidth(3);
+	  nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
+	  nRF24_SetTXPower(nRF24_TXPWR_12dBm);
+	  nRF24_SetOperationalMode(nRF24_MODE_TX);
+	  nRF24_ClearIRQFlags();
+	  nRF24_SetPowerMode(nRF24_PWR_UP);
+
+	  nRF24_payloadTX[0] =11;
+	  nRF24_payloadTX[1] =12;
+
+	  // Transmit a packet
+	  nRF24_TransmitPacket(nRF24_payloadTX, 2);
+	  //------------------------------------------------------------------------------
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -501,6 +579,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : NRF24_IRQ_Pin */
+  GPIO_InitStruct.Pin = NRF24_IRQ_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(NRF24_IRQ_GPIO_Port, &GPIO_InitStruct);
 
 }
 

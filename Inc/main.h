@@ -104,6 +104,8 @@ void Error_Handler(void);
 #define T3_GPIO_Port GPIOA
 #define T4_Pin GPIO_PIN_12
 #define T4_GPIO_Port GPIOA
+#define NRF24_IRQ_Pin GPIO_PIN_15
+#define NRF24_IRQ_GPIO_Port GPIOA
 #define TOGGL_Pin GPIO_PIN_4
 #define TOGGL_GPIO_Port GPIOB
 #define LED3_Pin GPIO_PIN_5
