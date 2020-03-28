@@ -23,6 +23,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "nrf24.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,12 +100,17 @@ int32_t DjoyLEFTRIGHTzeroOffset;
 uint32_t potenc1=0;
 uint32_t potenc2=0;
 
-
-
 uint32_t offsetsetcount=0;
 
+uint32_t TXdelay=0;
+
+uint8_t Buttons;
+
 extern uint32_t watch1;
+extern uint32_t watch2;
 extern uint16_t adcDataArray[7];
+extern uint8_t nRF24_payloadTX[32]; //TX buffer
+extern uint8_t nRF24_payloadRX[32]; //RX buffer
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -256,8 +262,8 @@ void SysTick_Handler(void)
   T4status=!HAL_GPIO_ReadPin(T4_GPIO_Port,T4_Pin);
   TDstatus=!HAL_GPIO_ReadPin(DT_GPIO_Port,DT_Pin);
   TLstatus=!HAL_GPIO_ReadPin(LT_GPIO_Port,LT_Pin);
-  TOGGLstatus=!HAL_GPIO_ReadPin(TOGGL_GPIO_Port,TOGGL_Pin);
-  TOGGDstatus=!HAL_GPIO_ReadPin(TOGGD_GPIO_Port,TOGGD_Pin);
+  TOGGLstatus=HAL_GPIO_ReadPin(TOGGL_GPIO_Port,TOGGL_Pin);
+  TOGGDstatus=HAL_GPIO_ReadPin(TOGGD_GPIO_Port,TOGGD_Pin);
   //INTERPRET BUTTONS-----------------------------------------
 
   //Set flag on T1 press
@@ -471,6 +477,33 @@ void SysTick_Handler(void)
 	 potenc2=100-adcDataArray[5]*100/4095;
      //-------------------------------------------------------------
 
+	 //Save Buttons into 8bits
+	 Buttons=(TOGGLstatusdebounce<<7) +  (TOGGDstatusdebounce<<6) + (T1statusdebounce<<5) + (T2statusdebounce<<4) + (T3statusdebounce<<3) + (T4statusdebounce<<2) + (TLstatusdebounce<<1) + TDstatusdebounce;
+
+	 //NRF24-TRANSMIT---------------------------------------------------------------
+	 TXdelay++;
+	 if(TXdelay==TXPERIOD)
+	 {
+		 TXdelay=0;
+
+		 nRF24_CE_L(); //enable TX
+
+		 //SEND DATA TO DRONE
+		 nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
+		 nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
+		 nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
+		 nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
+		 nRF24_payloadTX[4] = (uint8_t)(potenc1);
+		 nRF24_payloadTX[5] = (uint8_t)(potenc2);
+		 nRF24_payloadTX[6] = (uint8_t)(Buttons);
+
+		 // Transmit a packet
+		 nRF24_TransmitPacket(nRF24_payloadTX, 7);
+
+		 watch1++;
+	 }
+	 //------------------------------------------------------------------------------
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -491,7 +524,6 @@ void DMA1_Channel1_IRQHandler(void)
   /* USER CODE END DMA1_Channel1_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_adc1);
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
-  watch1++;
   /* USER CODE END DMA1_Channel1_IRQn 1 */
 }
 

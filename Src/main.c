@@ -53,8 +53,15 @@ SPI_HandleTypeDef hspi1;
 /* USER CODE BEGIN PV */
 uint32_t test1;
 uint32_t test2;
-uint32_t watch1;
 uint32_t wifiOK;
+
+uint32_t watch1;
+uint32_t watch2;
+uint32_t watch3;
+uint32_t watch4;
+uint32_t watch5;
+
+
 
 char stringlcd1[20];
 char stringlcd2[20];
@@ -98,7 +105,7 @@ extern uint32_t potenc2;
 //NRF24
 uint8_t nRF24_payloadTX[32]; //TX buffer
 uint8_t nRF24_payloadRX[32]; //RX buffer
-const uint8_t nRF24_ADDR[3] = {2, 3, 4 }; //Address
+const uint8_t nRF24_ADDR[3] = {5, 3, 5 }; //Address
 
 /* USER CODE END PV */
 
@@ -194,7 +201,7 @@ int main(void)
   nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
 
   // Set TX power
-  nRF24_SetTXPower(nRF24_TXPWR_12dBm);
+  nRF24_SetTXPower(nRF24_TXPWR_18dBm);
 
   // Set operational mode (PTX == transmitter)
   nRF24_SetOperationalMode(nRF24_MODE_TX);
@@ -241,38 +248,14 @@ int main(void)
 
 	  if(wifiOK)
 	  {
-		  sprintf(stringlcd2,"Wifi OK");
+		  sprintf(stringlcd2,"OK - %u  %u",watch1,watch2);
 		  LCD_print(stringlcd2,0,5);
 	  }
 	  else
 	  {
-		  sprintf(stringlcd2,"Wifi Fail");
+		  sprintf(stringlcd2,"FL - %u  %u",watch1,watch2);
 		  LCD_print(stringlcd2,0,5);
 	  }
-
-
-	  //Test--TX----------------------------------------------------------------------
-	  HAL_Delay(100);
-	  //SEND DATA TO DRONE
-	  nRF24_CE_L(); //DISABLE RX
-	  nRF24_Init();
-	  nRF24_DisableAA(0xFF);
-	  nRF24_SetRFChannel(15);//
-	  nRF24_SetDataRate(nRF24_DR_250kbps);
-	  nRF24_SetCRCScheme(nRF24_CRC_2byte);
-	  nRF24_SetAddrWidth(3);
-	  nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
-	  nRF24_SetTXPower(nRF24_TXPWR_12dBm);
-	  nRF24_SetOperationalMode(nRF24_MODE_TX);
-	  nRF24_ClearIRQFlags();
-	  nRF24_SetPowerMode(nRF24_PWR_UP);
-
-	  nRF24_payloadTX[0] =11;
-	  nRF24_payloadTX[1] =12;
-
-	  // Transmit a packet
-	  nRF24_TransmitPacket(nRF24_payloadTX, 2);
-	  //------------------------------------------------------------------------------
 
     /* USER CODE END WHILE */
 
@@ -475,7 +458,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
