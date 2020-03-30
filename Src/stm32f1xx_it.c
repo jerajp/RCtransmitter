@@ -111,6 +111,7 @@ extern uint32_t watch2;
 extern uint16_t adcDataArray[7];
 extern uint8_t nRF24_payloadTX[32]; //TX buffer
 extern uint8_t nRF24_payloadRX[32]; //RX buffer
+extern const uint8_t nRF24_ADDR[3];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -396,7 +397,7 @@ void SysTick_Handler(void)
         }
 
      //LEDS
-     if(T1statusdebounce)LED1ON;
+     if(T1statusdebounce) LED1ON;
      else LED1OFF;
 
      if(T2statusdebounce)LED2ON;
@@ -501,6 +502,7 @@ void SysTick_Handler(void)
 		 nRF24_TransmitPacket(nRF24_payloadTX, 7);
 
 		 watch1++;
+
 	 }
 	 //------------------------------------------------------------------------------
 
