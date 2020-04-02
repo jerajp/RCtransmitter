@@ -53,6 +53,8 @@ SPI_HandleTypeDef hspi1;
 /* USER CODE BEGIN PV */
 uint32_t test1;
 uint32_t test2;
+uint32_t test3;
+uint32_t test4;
 uint32_t wifiOK;
 
 uint32_t watch1;
@@ -252,13 +254,77 @@ int main(void)
 	  //sprintf(stringlcd1,"%u %u    ",potenc1,potenc2);
 	  //LCD_print(stringlcd1,0,4);
 
-	  //test2=DWT->CYCCNT-test1;
+
+	  sprintf(stringlcd1,"RX us=%u",test2/72);
+	  LCD_print(stringlcd1,0,3);
+
+	  sprintf(stringlcd1,"TX us=%u",test4/72);
+	  LCD_print(stringlcd1,0,4);
 
 	  sprintf(stringlcd2,"%u %u %u %u",watch1, watch2,watch3,watch4);
 	  LCD_print(stringlcd2,0,5);
 
 	  //test1=DWT->CYCCNT;
 	  //test2=DWT->CYCCNT-test1;
+
+		 TXdelay++;
+		 if(TXdelay==TXPERIOD)
+		 {
+			test3=DWT->CYCCNT;
+
+		  	TXdelay=0;
+
+		  	//TX
+		  	nRF24_CE_L(); //DISABLE RX
+		  	nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
+		  	nRF24_SetOperationalMode(nRF24_MODE_TX);
+
+		  	//SEND DATA TO DRONE
+		  	nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
+		  	nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
+		  	nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
+		  	nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
+		  	nRF24_payloadTX[4] = (uint8_t)(potenc1);
+		  	nRF24_payloadTX[5] = (uint8_t)(potenc2);
+		  	nRF24_payloadTX[6] = (uint8_t)(Buttons);
+
+		  	// Transmit a packet
+		  	nRF24_TransmitPacket(nRF24_payloadTX, 7);
+
+		  	watch1++;
+
+		  	//RX
+		  	nRF24_CE_H();//Enable RX
+		  	nRF24_SetAddr(nRF24_PIPE1, nRF24_ADDR); // program address for RX pipe #1
+		  	nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 2); // Auto-ACK: disabled, payload length: 5 bytes
+		  	nRF24_SetOperationalMode(nRF24_MODE_RX);
+
+		  	test4=DWT->CYCCNT-test3;
+		 }
+		 else //check for RX data
+		 {
+
+
+		  	//Recieve NRF24 Data
+		  	if ((nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) )
+		  	{
+		  		test1=DWT->CYCCNT;
+
+		  		// Get a payload from the transceiver
+		  		nRF24_ReadPayload(nRF24_payloadRX, &RXstpaketov);
+		  		// Clear all pending IRQ flags
+		  		nRF24_ClearIRQFlags();
+
+		  		DroneBattLowerByte=nRF24_payloadRX[0];
+		  		DroneBattUpperByte=nRF24_payloadRX[1];
+		  		DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+
+		  	     watch2++;
+
+
+		  	 	test2=DWT->CYCCNT-test1;
+		  	}
+		 }
 
     /* USER CODE END WHILE */
 
@@ -461,7 +527,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
