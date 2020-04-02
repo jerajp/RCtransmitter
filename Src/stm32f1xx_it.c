@@ -106,12 +106,21 @@ uint32_t TXdelay=0;
 
 uint8_t Buttons;
 
+uint32_t DroneBattUpperByte;
+uint32_t DroneBattLowerByte;
+uint32_t DroneBattmV;
+
 extern uint32_t watch1;
 extern uint32_t watch2;
+extern uint32_t watch3;
+extern uint32_t watch4;
+extern uint32_t test1;
+extern uint32_t test2;
 extern uint16_t adcDataArray[7];
 extern uint8_t nRF24_payloadTX[32]; //TX buffer
 extern uint8_t nRF24_payloadRX[32]; //RX buffer
 extern const uint8_t nRF24_ADDR[3];
+extern uint8_t RXstpaketov;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -255,6 +264,8 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+
+
 
   //Read push-buttons, internal pull-up, switch to GND
   T1status=!HAL_GPIO_ReadPin(T1_GPIO_Port,T1_Pin);
@@ -430,6 +441,7 @@ void SysTick_Handler(void)
      BattmVAVG=BattmVSUM/(BATTAVERAGETIME);
      Batt1cellAVG=BattmVAVG/2; //display average voltage per 1 li-ion cell
 
+
      //Joysticks---------------------------------------------------------------
 
      LjoyUPDOWNzeroOffset=adcDataArray[0];
@@ -481,30 +493,56 @@ void SysTick_Handler(void)
 	 //Save Buttons into 8bits
 	 Buttons=(TOGGLstatusdebounce<<7) +  (TOGGDstatusdebounce<<6) + (T1statusdebounce<<5) + (T2statusdebounce<<4) + (T3statusdebounce<<3) + (T4statusdebounce<<2) + (TLstatusdebounce<<1) + TDstatusdebounce;
 
-	 //NRF24-TRANSMIT---------------------------------------------------------------
+	 //NRF24----------------------------------------------------------------------------------------
 	 TXdelay++;
 	 if(TXdelay==TXPERIOD)
 	 {
-		 TXdelay=0;
 
-		 nRF24_CE_L(); //enable TX
+	  	TXdelay=0;
 
-		 //SEND DATA TO DRONE
-		 nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
-		 nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
-		 nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
-		 nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
-		 nRF24_payloadTX[4] = (uint8_t)(potenc1);
-		 nRF24_payloadTX[5] = (uint8_t)(potenc2);
-		 nRF24_payloadTX[6] = (uint8_t)(Buttons);
+	  	//TX
+	  	nRF24_CE_L(); //DISABLE RX
+	  	nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
+	  	nRF24_SetOperationalMode(nRF24_MODE_TX);
 
-		 // Transmit a packet
-		 nRF24_TransmitPacket(nRF24_payloadTX, 7);
+	  	//SEND DATA TO DRONE
+	  	nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
+	  	nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
+	  	nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
+	  	nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
+	  	nRF24_payloadTX[4] = (uint8_t)(potenc1);
+	  	nRF24_payloadTX[5] = (uint8_t)(potenc2);
+	  	nRF24_payloadTX[6] = (uint8_t)(Buttons);
 
-		 watch1++;
+	  	// Transmit a packet
+	  	nRF24_TransmitPacket(nRF24_payloadTX, 7);
+
+	  	watch1++;
+
+	  	//RX
+	  	nRF24_CE_H();//Enable RX
+	  	nRF24_SetAddr(nRF24_PIPE1, nRF24_ADDR); // program address for RX pipe #1
+	  	nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 2); // Auto-ACK: disabled, payload length: 5 bytes
+	  	nRF24_SetOperationalMode(nRF24_MODE_RX);
 
 	 }
-	 //------------------------------------------------------------------------------
+	 else //check for RX data
+	 {
+	  	//Recieve NRF24 Data
+	  	if ((nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) )
+	  	{
+	  		// Get a payload from the transceiver
+	  		nRF24_ReadPayload(nRF24_payloadRX, &RXstpaketov);
+	  		// Clear all pending IRQ flags
+	  		nRF24_ClearIRQFlags();
+
+	  		DroneBattLowerByte=nRF24_payloadRX[0];
+	  		DroneBattUpperByte=nRF24_payloadRX[1];
+	  		DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+
+	  	     watch2++;
+	  	}
+	 }//-------------------------------------------------------------------------------------------
 
   /* USER CODE END SysTick_IRQn 1 */
 }

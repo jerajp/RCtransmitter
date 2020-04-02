@@ -106,7 +106,13 @@ extern uint32_t potenc2;
 uint8_t nRF24_payloadTX[32]; //TX buffer
 uint8_t nRF24_payloadRX[32]; //RX buffer
 const uint8_t nRF24_ADDR[3] = {5, 3, 5 }; //Address
+uint8_t RXstpaketov=0;
 
+extern uint32_t TXdelay;
+extern uint8_t Buttons;
+extern uint32_t DroneBattUpperByte;
+extern uint32_t DroneBattLowerByte;
+extern uint32_t DroneBattmV;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -201,7 +207,7 @@ int main(void)
   nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
 
   // Set TX power
-  nRF24_SetTXPower(nRF24_TXPWR_18dBm);
+  nRF24_SetTXPower(nRF24_TXPWR_0dBm);
 
   // Set operational mode (PTX == transmitter)
   nRF24_SetOperationalMode(nRF24_MODE_TX);
@@ -227,35 +233,32 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  test1=DWT->CYCCNT;
 
-	  sprintf(stringlcd1,"%u%u%u%u %u%u %u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
-	  LCD_print(stringlcd1,0,0);
-
-	  sprintf(stringlcd1,"BmV: %u",Batt1cellAVG);
+	  sprintf(stringlcd1,"RC: %u mV",Batt1cellAVG);
 	  LCD_print(stringlcd1,0,1);
 
-	  sprintf(stringlcd1,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
+	  sprintf(stringlcd1,"DR: %u mV",DroneBattmV);
 	  LCD_print(stringlcd1,0,2);
 
-	  sprintf(stringlcd1,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
-	  LCD_print(stringlcd1,0,3);
+	  //sprintf(stringlcd1,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
+	  //LCD_print(stringlcd1,0,3);
 
-	  sprintf(stringlcd1,"%u %u    ",potenc1,potenc2);
-	  LCD_print(stringlcd1,0,4);
+	  //sprintf(stringlcd1,"%u%u%u%u%u%u%u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
+	  //LCD_print(stringlcd1,0,4);
 
-	  test2=DWT->CYCCNT-test1;
+	  //sprintf(stringlcd1,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
+	  //LCD_print(stringlcd1,0,3);
 
-	  if(wifiOK)
-	  {
-		  sprintf(stringlcd2,"OK - %u  %u",watch1,watch2);
-		  LCD_print(stringlcd2,0,5);
-	  }
-	  else
-	  {
-		  sprintf(stringlcd2,"FL - %u  %u",watch1,watch2);
-		  LCD_print(stringlcd2,0,5);
-	  }
+	  //sprintf(stringlcd1,"%u %u    ",potenc1,potenc2);
+	  //LCD_print(stringlcd1,0,4);
+
+	  //test2=DWT->CYCCNT-test1;
+
+	  sprintf(stringlcd2,"%u %u %u %u",watch1, watch2,watch3,watch4);
+	  LCD_print(stringlcd2,0,5);
+
+	  //test1=DWT->CYCCNT;
+	  //test2=DWT->CYCCNT-test1;
 
     /* USER CODE END WHILE */
 
