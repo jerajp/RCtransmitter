@@ -45,7 +45,7 @@ extern "C" {
 /* USER CODE BEGIN EC */
 #define BUTTONTHRESHOLD 10
 #define BATTAVERAGETIME 50 //50 msec average
-#define TXPERIOD 50 	  //50ms
+#define TXPERIOD 20 	  //10ms
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

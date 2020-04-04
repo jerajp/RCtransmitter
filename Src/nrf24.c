@@ -3,9 +3,9 @@
 
 #include "nrf24.h"
 #include "SPI-test.h"
+#include "main.h"
 
 extern SPI_HandleTypeDef hspi1;
-
 
 //HW dependent
 //Ti ukazi vrinejo 128 stevila ko prejema v TX ??!
@@ -45,9 +45,11 @@ nRF24_TXResult nRF24_TransmitPacket(uint8_t *pBuf, uint8_t length) {
 	// Deassert the CE pin (Standby-II --> Standby-I)
 	nRF24_CE_L();
 
+
 	if (!wait) {
 		// Timeout
 		return nRF24_TX_TIMEOUT;
+
 	}
 
 	// Clear pending IRQ flags
@@ -56,11 +58,13 @@ nRF24_TXResult nRF24_TransmitPacket(uint8_t *pBuf, uint8_t length) {
 	if (status & nRF24_FLAG_MAX_RT) {
 		// Auto retransmit counter exceeds the programmed maximum limit (FIFO is not removed)
 		return nRF24_TX_MAXRT;
+
 	}
 
 	if (status & nRF24_FLAG_TX_DS) {
 		// Successful transmission
 		return nRF24_TX_SUCCESS;
+
 	}
 
 	// Some banana happens, a payload remains in the TX FIFO, flush it
@@ -68,7 +72,6 @@ nRF24_TXResult nRF24_TransmitPacket(uint8_t *pBuf, uint8_t length) {
 
 	return nRF24_TX_ERROR;
 }
-
 
 
 

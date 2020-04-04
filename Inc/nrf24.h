@@ -12,6 +12,7 @@ typedef enum {
 // Used for not stuck waiting for IRQ
 #define nRF24_WAIT_TIMEOUT         (uint32_t)0x000FFFFF
 
+
 //HW DEFINES
 // SPI port peripheral
 #define nRF24_SPI_PORT             SPI1

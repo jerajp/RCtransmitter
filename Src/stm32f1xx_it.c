@@ -103,6 +103,7 @@ uint32_t potenc2=0;
 uint32_t offsetsetcount=0;
 
 uint32_t TXdelay=0;
+uint32_t PingRXDataFlag=0;
 
 uint8_t Buttons;
 
@@ -110,17 +111,9 @@ uint32_t DroneBattUpperByte;
 uint32_t DroneBattLowerByte;
 uint32_t DroneBattmV;
 
-extern uint32_t watch1;
-extern uint32_t watch2;
-extern uint32_t watch3;
-extern uint32_t watch4;
-extern uint32_t test1;
-extern uint32_t test2;
-extern uint16_t adcDataArray[7];
-extern uint8_t nRF24_payloadTX[32]; //TX buffer
-extern uint8_t nRF24_payloadRX[32]; //RX buffer
-extern const uint8_t nRF24_ADDR[3];
-extern uint8_t RXstpaketov;
+uint32_t MSGsend;
+uint32_t MSGrecv;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,6 +129,22 @@ extern uint8_t RXstpaketov;
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
+
+extern uint32_t watch1;
+extern uint32_t watch2;
+extern uint32_t watch3;
+extern uint32_t watch4;
+extern uint32_t watch5;
+extern uint32_t test1;
+extern uint32_t test2;
+extern uint32_t test3;
+extern uint32_t test4;
+extern uint16_t adcDataArray[7];
+extern uint8_t nRF24_payloadTX[32]; //TX buffer
+extern uint8_t nRF24_payloadRX[32]; //RX buffer
+extern const uint8_t nRF24_ADDR[3];
+extern uint8_t RXstpaketov;
+extern uint32_t MainInitDoneFlag;
 
 /* USER CODE END EV */
 
@@ -264,7 +273,7 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  LED4ON;
 
 
   //Read push-buttons, internal pull-up, switch to GND
@@ -408,7 +417,7 @@ void SysTick_Handler(void)
         }
 
      //LEDS
-     if(T1statusdebounce) LED1ON;
+     if(T1statusdebounce) {LED1ON; MSGsend=0; MSGrecv=0;}
      else LED1OFF;
 
      if(T2statusdebounce)LED2ON;
@@ -417,8 +426,8 @@ void SysTick_Handler(void)
      if(T3statusdebounce)LED3ON;
      else LED3OFF;
 
-     if(T4statusdebounce)LED4ON;
-     else LED4OFF;
+     //if(T4statusdebounce)LED4ON;
+    // else LED4OFF;
 
 
      //ADC interpret
@@ -493,10 +502,80 @@ void SysTick_Handler(void)
 	 //Save Buttons into 8bits
 	 Buttons=(TOGGLstatusdebounce<<7) +  (TOGGDstatusdebounce<<6) + (T1statusdebounce<<5) + (T2statusdebounce<<4) + (T3statusdebounce<<3) + (T4statusdebounce<<2) + (TLstatusdebounce<<1) + TDstatusdebounce;
 
-	 //NRF24----------------------------------------------------------------------------------------
 
-	 //-------------------------------------------------------------------------------------------
+	 //NRF24---------------------------------------------------------------------------------------
+	 if(MainInitDoneFlag)
+	 {
 
+		 switch(TXdelay)
+		 {
+	 	 	 case 0:
+	 	 	 	 	 {
+	 	 	 	 		//SET TX MODE
+	 	 	 	 		nRF24_CE_L();//END RX
+						nRF24_SetOperationalMode(nRF24_MODE_TX);
+						PingRXDataFlag=0;
+	 	 	 	 	 }break;
+
+		 	 case 5:
+		 	 	 	 {
+		 	 	 		//TRANSMIT
+		 	 	 		MSGsend++;
+
+		 	 	 		//SEND DATA TO DRONE
+		 	 	 		nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
+		 	 	 		nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
+		 	 	 		nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
+		 	 	 		nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
+		 	 	 		nRF24_payloadTX[4] = (uint8_t)(potenc1);
+		 	 	 		nRF24_payloadTX[5] = (uint8_t)(potenc2);
+		 	 	 		nRF24_payloadTX[6] = (uint8_t)(Buttons);
+
+		 	 	 		// Transmit a packet
+		 	 	 		nRF24_TransmitPacket(nRF24_payloadTX, 7);
+		 	 	 	 }break;
+
+		 	 case 6:
+		 	 	 	 {
+		 	 	 		 //SET RX MODE
+		 				nRF24_SetOperationalMode(nRF24_MODE_RX);
+		 				nRF24_CE_H(); //Start RX)
+
+		 	 	 	 }break;
+
+		 	 case 7:
+		 	 	 	 {
+		 	 	 		PingRXDataFlag=1;
+
+		 	 	 	 }break;
+		 }
+
+		 if(PingRXDataFlag)//Ping for RX data
+		 {
+
+	 	 	 if ((nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) )
+	 	 	 {
+	 	 	 	// Get a payload from the transceiver
+	 	 	 	nRF24_ReadPayload(nRF24_payloadRX, &RXstpaketov);
+
+	 	 	 	//Clear all pending IRQ flags
+	 	 	 	nRF24_ClearIRQFlags();
+
+	 	 	 	DroneBattLowerByte=nRF24_payloadRX[0];
+	 	 	 	DroneBattUpperByte=nRF24_payloadRX[1];
+	 	 	 	DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+
+	 	 	 	MSGrecv++;
+	 	 	 }
+		 }
+
+
+		 TXdelay++;
+		 if(TXdelay==TXPERIOD)TXdelay=0;
+	 }//----------------------------------------------------------------------------------------------
+
+
+	LED4OFF;
   /* USER CODE END SysTick_IRQn 1 */
 }
 
