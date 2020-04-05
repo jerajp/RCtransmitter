@@ -65,16 +65,8 @@ uint32_t watch5;
 uint32_t watch6;
 
 
-char stringlcd1[20];
-char stringlcd2[20];
-char stringlcd3[20];
-char stringlcd4[20];
-char stringlcd5[20];
-char stringlcd6[20];
-char stringlcd7[20];
-char stringlcd8[20];
-char stringlcd9[20];
-char stringlcd10[20];
+char stringlcdBuffer[20];
+
 
 extern uint32_t T1statusdebounce;
 extern uint32_t T2statusdebounce;
@@ -103,6 +95,8 @@ extern uint32_t offsetDjoyLEFTRIGHT;
 extern uint32_t potenc1;
 extern uint32_t potenc2;
 
+uint32_t LCDMenu=0;
+uint32_t LCDMenuHist=0;
 
 //NRF24
 uint8_t nRF24_payloadTX[32]; //TX buffer
@@ -116,8 +110,10 @@ extern uint32_t DroneBattUpperByte;
 extern uint32_t DroneBattLowerByte;
 extern uint32_t DroneBattmV;
 
-extern uint32_t MSGsend;
-extern uint32_t MSGrecv;
+extern uint32_t TotalMSGsend;
+extern uint32_t TotalMSGrecv;
+extern uint32_t MSGprerSecond;
+extern uint32_t MSGLowCount;
 
 uint32_t MainInitDoneFlag=0;
 /* USER CODE END PV */
@@ -247,30 +243,66 @@ int main(void)
   while (1)
   {
 
-	  sprintf(stringlcd1,"RC: %u mV",Batt1cellAVG);
-	  LCD_print(stringlcd1,0,1);
+	  if(LCDMenuHist!=LCDMenu)LCD_clrScr();
+	  LCDMenuHist=LCDMenu;
 
-	  sprintf(stringlcd1,"DR: %u mV",DroneBattmV);
-	  LCD_print(stringlcd1,0,2);
+	  switch(LCDMenu)
+	  {
+	  	  case 0:{	  //Main menu
+		  	  	  	  sprintf(stringlcdBuffer,"Battery");
+		  	  	  	  LCD_print(stringlcdBuffer,0,0);
 
-	  //sprintf(stringlcd1,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
-	  //LCD_print(stringlcd1,0,3);
+	  		  	  	  sprintf(stringlcdBuffer,"RC: %u mV",Batt1cellAVG);
+	  		  	  	  LCD_print(stringlcdBuffer,0,1);
 
-	  //sprintf(stringlcd1,"%u%u%u%u%u%u%u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
-	  //LCD_print(stringlcd1,0,4);
+	  		  	  	  sprintf(stringlcdBuffer,"DR: %u mV",DroneBattmV);
+	  		  	  	  LCD_print(stringlcdBuffer,0,2);
 
-	  //sprintf(stringlcd1,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
-	  //LCD_print(stringlcd1,0,3);
+	  	  	  	 }break;
 
-	  //sprintf(stringlcd1,"%u %u    ",potenc1,potenc2);
-	  //LCD_print(stringlcd1,0,4);
+	  	  case 1:{
+	  		  	  	  //Diagnostics Connection
+	  		  	  	  sprintf(stringlcdBuffer,"Total MSG");
+	  	  	  	  	  LCD_print(stringlcdBuffer,0,0);
 
-	  sprintf(stringlcd1,"Send %u",MSGsend);
-	  LCD_print(stringlcd1,0,4);
+	  	  	  	  	  sprintf(stringlcdBuffer,"Send %u",TotalMSGsend);
+	  	  	  	  	  LCD_print(stringlcdBuffer,0,1);
 
-	  sprintf(stringlcd2,"Recv %u",MSGrecv);
-	  LCD_print(stringlcd2,0,5);
+	  	  	  	  	  sprintf(stringlcdBuffer,"Recv %u",TotalMSGrecv);
+	  	  	  	  	  LCD_print(stringlcdBuffer,0,2);
 
+	  	  	  	  	  sprintf(stringlcdBuffer,"MSG/s: %u",MSGprerSecond);
+	  	  	  	  	  LCD_print(stringlcdBuffer,0,3);
+
+	  		  	  	  sprintf(stringlcdBuffer,"RClow[s]: %u",MSGLowCount);
+	  		  	  	  LCD_print(stringlcdBuffer,0,4);
+
+	  	  	  	 }break;
+
+
+	  	  case 2:{
+	  		  	  	  //Diagnostics Inputs
+	  		  	  	  sprintf(stringlcdBuffer,"INPUTS");
+	  			  	  LCD_print(stringlcdBuffer,0,0);
+
+	  		  	  	  sprintf(stringlcdBuffer,"Buttons:");
+		  			  LCD_print(stringlcdBuffer,0,1);
+
+		  			  sprintf(stringlcdBuffer,"%u%u%u%u %u%u %u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
+		  			  LCD_print(stringlcdBuffer,0,2);
+
+	  		  	  	  sprintf(stringlcdBuffer,"Pot: %u %u",potenc1,potenc2);
+		  			  LCD_print(stringlcdBuffer,0,3);
+
+		  			  sprintf(stringlcdBuffer,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
+		  			  LCD_print(stringlcdBuffer,0,4);
+
+		  			  sprintf(stringlcdBuffer,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
+		  			  LCD_print(stringlcdBuffer,0,5);
+
+	  	  	  	 }break;
+
+	  }
 
 	  //test1=DWT->CYCCNT;
 	  //test2=DWT->CYCCNT-test1;

@@ -48,6 +48,11 @@ uint32_t T2statusdebounce=0;
 uint32_t T3statusdebounce=0;
 uint32_t T4statusdebounce=0;
 
+uint32_t T1statusdebounceHist=0;
+uint32_t T2statusdebounceHist=0;
+uint32_t T3statusdebounceHist=0;
+uint32_t T4statusdebounceHist=0;
+
 uint32_t T1status=0;
 uint32_t T2status=0;
 uint32_t T3status=0;
@@ -111,8 +116,15 @@ uint32_t DroneBattUpperByte;
 uint32_t DroneBattLowerByte;
 uint32_t DroneBattmV;
 
-uint32_t MSGsend;
-uint32_t MSGrecv;
+uint32_t TotalMSGsend;
+uint32_t TotalMSGrecv;
+uint32_t MSGcount;
+uint32_t MSGprerSecond;
+uint32_t MSGLowCount;
+uint32_t ConnectWeakFlag;
+
+uint32_t  LoopCounter=0;
+
 
 /* USER CODE END PV */
 
@@ -145,7 +157,7 @@ extern uint8_t nRF24_payloadRX[32]; //RX buffer
 extern const uint8_t nRF24_ADDR[3];
 extern uint8_t RXstpaketov;
 extern uint32_t MainInitDoneFlag;
-
+extern uint32_t LCDMenu;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -273,8 +285,6 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-  LED4ON;
-
 
   //Read push-buttons, internal pull-up, switch to GND
   T1status=!HAL_GPIO_ReadPin(T1_GPIO_Port,T1_Pin);
@@ -286,6 +296,13 @@ void SysTick_Handler(void)
   TOGGLstatus=HAL_GPIO_ReadPin(TOGGL_GPIO_Port,TOGGL_Pin);
   TOGGDstatus=HAL_GPIO_ReadPin(TOGGD_GPIO_Port,TOGGD_Pin);
   //INTERPRET BUTTONS-----------------------------------------
+
+  //Save old values
+  T1statusdebounceHist=T1statusdebounce;
+  T2statusdebounceHist=T2statusdebounce;
+  T3statusdebounceHist=T3statusdebounce;
+  T4statusdebounceHist=T4statusdebounce;
+
 
   //Set flag on T1 press
   if(T1status==1)
@@ -417,20 +434,52 @@ void SysTick_Handler(void)
         }
 
      //LEDS
-     if(T1statusdebounce) {LED1ON; MSGsend=0; MSGrecv=0;}
+
+     //LED 1 LOW BATT
+     if( (Batt1cellAVG < MINREMOTEBATT) ||  (DroneBattmV < MINDRONEBATT) ) LED1ON;
      else LED1OFF;
 
-     if(T2statusdebounce)LED2ON;
-     else LED2OFF;
+     //LED2 RC connection OK
+     if(ConnectWeakFlag)LED2OFF;
+     else LED2ON;
 
-     if(T3statusdebounce)LED3ON;
-     else LED3OFF;
-
-     //if(T4statusdebounce)LED4ON;
-    // else LED4OFF;
+     //LED1ON;
+     //LED1OFF;
 
 
-     //ADC interpret
+     //LED3ON;
+     //LED3OFF;
+
+     //LED4ON;
+     //LED4OFF;
+
+     // T1 button Edge to 1
+     if(T1statusdebounceHist!=T1statusdebounce && T1statusdebounce==1)
+     {
+
+     }
+
+     // T2 button Edge to 1
+     if(T2statusdebounceHist!=T2statusdebounce && T2statusdebounce==1)
+     {
+
+     }
+
+     // T3 button Edge to 1
+     if(T3statusdebounceHist!=T3statusdebounce && T3statusdebounce==1)
+     {
+
+     }
+
+     // T4 button Edge to 1
+     if(T4statusdebounceHist!=T4statusdebounce && T4statusdebounce==1)
+     {
+    	 LCDMenu++;
+    	 if(LCDMenu>LCDLASTMENU)LCDMenu=0;
+     }
+
+
+     //ADC interpret---------------------------------------------------------------------------------------------
 
      //Battery value 12k/6.8k divider----------------------------------
      BattmV=(adcDataArray[6]*3300*2.735)/4095;
@@ -497,7 +546,7 @@ void SysTick_Handler(void)
      //Potenciometers (inverted logic-HW)---------------------------
      potenc1=100-adcDataArray[4]*100/4095;
 	 potenc2=100-adcDataArray[5]*100/4095;
-     //-------------------------------------------------------------
+     //------------------------------------------------------------------------------------------------------------
 
 	 //Save Buttons into 8bits
 	 Buttons=(TOGGLstatusdebounce<<7) +  (TOGGDstatusdebounce<<6) + (T1statusdebounce<<5) + (T2statusdebounce<<4) + (T3statusdebounce<<3) + (T4statusdebounce<<2) + (TLstatusdebounce<<1) + TDstatusdebounce;
@@ -520,7 +569,7 @@ void SysTick_Handler(void)
 		 	 case 5:
 		 	 	 	 {
 		 	 	 		//TRANSMIT
-		 	 	 		MSGsend++;
+		 	 	 		TotalMSGsend++;
 
 		 	 	 		//SEND DATA TO DRONE
 		 	 	 		nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
@@ -565,17 +614,32 @@ void SysTick_Handler(void)
 	 	 	 	DroneBattUpperByte=nRF24_payloadRX[1];
 	 	 	 	DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
 
-	 	 	 	MSGrecv++;
+	 	 	 	TotalMSGrecv++;
+	 	 	 	MSGcount++;
 	 	 	 }
 		 }
 
+		 //MSG PER SECOND DIAGNOSTICS
+		 LoopCounter++;
+		 if(LoopCounter==1000)
+		 {
+			 MSGprerSecond=MSGcount;
 
+			 if(MSGcount<MINMSGPERSEC)
+		     {
+				 MSGLowCount++;
+				 ConnectWeakFlag=1;
+		     }
+			 else  ConnectWeakFlag=0;
+
+			 MSGcount=0;
+			 LoopCounter=0;
+		 }
 		 TXdelay++;
 		 if(TXdelay==TXPERIOD)TXdelay=0;
 	 }//----------------------------------------------------------------------------------------------
 
 
-	LED4OFF;
   /* USER CODE END SysTick_IRQn 1 */
 }
 

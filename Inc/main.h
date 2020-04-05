@@ -45,7 +45,12 @@ extern "C" {
 /* USER CODE BEGIN EC */
 #define BUTTONTHRESHOLD 10
 #define BATTAVERAGETIME 50 //50 msec average
-#define TXPERIOD 20 	  //10ms
+#define TXPERIOD 20 	  //20ms -50 MSG/sec
+#define LCDLASTMENU 2	  //3menus
+#define MINMSGPERSEC 10   //min 10 msg per second
+
+#define MINREMOTEBATT 3000
+#define MINDRONEBATT  9000
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
