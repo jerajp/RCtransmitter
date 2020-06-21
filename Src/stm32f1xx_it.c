@@ -84,6 +84,7 @@ uint32_t BattmVAVG=0;
 uint32_t Batt1cellAVG;
 uint32_t batthistindx=0;
 uint32_t BAttmVhist[BATTAVERAGETIME];
+uint32_t motorSTAT=0;
 
 uint32_t i;
 
@@ -115,6 +116,9 @@ uint8_t Buttons;
 uint32_t DroneBattUpperByte;
 uint32_t DroneBattLowerByte;
 uint32_t DroneBattmV;
+int32_t DronePitchAngle;
+int32_t DroneRollAngle;
+uint32_t GyroCalibInProgress=0;
 
 uint32_t TotalMSGsend;
 uint32_t TotalMSGrecv;
@@ -124,6 +128,7 @@ uint32_t MSGLowCount;
 uint32_t ConnectWeakFlag;
 
 uint32_t  LoopCounter=0;
+
 
 
 /* USER CODE END PV */
@@ -447,8 +452,9 @@ void SysTick_Handler(void)
      //LED1OFF;
 
 
-     //LED3ON;
-     //LED3OFF;
+     //LED3 GYRO CALIB INDIC
+     if(GyroCalibInProgress)LED3ON;
+     else LED3OFF;
 
      //LED4ON;
      //LED4OFF;
@@ -614,7 +620,17 @@ void SysTick_Handler(void)
 	 	 	 	DroneBattUpperByte=nRF24_payloadRX[1];
 	 	 	 	DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
 
-	 	 	 	TotalMSGrecv++;
+	 	 	 	DronePitchAngle=nRF24_payloadRX[2];
+	 	 	 	DroneRollAngle=nRF24_payloadRX[3];
+
+				if(nRF24_payloadRX[4] & 0x1)DronePitchAngle*=(-1);
+				else if((nRF24_payloadRX[4]>>1)& 0x1)DroneRollAngle*=(-1);
+
+				GyroCalibInProgress=(nRF24_payloadRX[4]>>2) & 0x1;
+
+				motorSTAT=(nRF24_payloadRX[4]>>3) & 0x7; //last 3 bits
+
+				TotalMSGrecv++;
 	 	 	 	MSGcount++;
 	 	 	 }
 		 }

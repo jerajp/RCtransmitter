@@ -50,7 +50,7 @@ extern "C" {
 #define MINMSGPERSEC 10   //min 10 msg per second
 
 #define MINREMOTEBATT 3000
-#define MINDRONEBATT  9000
+#define MINDRONEBATT  10500
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

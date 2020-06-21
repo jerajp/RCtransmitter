@@ -80,7 +80,7 @@ extern uint32_t TOGGDstatusdebounce;
 uint16_t adcDataArray[7];
 
 extern uint32_t Batt1cellAVG;
-
+extern uint32_t motorSTAT;
 
 extern uint32_t LjoyUPDOWN;
 extern uint32_t LjoyLEFTRIGHT;
@@ -109,6 +109,8 @@ extern uint8_t Buttons;
 extern uint32_t DroneBattUpperByte;
 extern uint32_t DroneBattLowerByte;
 extern uint32_t DroneBattmV;
+extern int32_t DronePitchAngle;
+extern int32_t DroneRollAngle;
 
 extern uint32_t TotalMSGsend;
 extern uint32_t TotalMSGrecv;
@@ -211,7 +213,7 @@ int main(void)
   nRF24_SetAddrWidth(3);
 
   nRF24_SetAddr(nRF24_PIPE1, nRF24_ADDR); // program address for RX pipe #1
-  nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 2); // Auto-ACK: disabled, payload length: 2 bytes
+  nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 5); // Auto-ACK: disabled, payload length: 5 bytes
 
   nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
 
@@ -248,15 +250,39 @@ int main(void)
 
 	  switch(LCDMenu)
 	  {
-	  	  case 0:{	  //Main menu
-		  	  	  	  sprintf(stringlcdBuffer,"Battery");
-		  	  	  	  LCD_print(stringlcdBuffer,0,0);
+	  	  case 0:{
+	  		  	  	  //Main menu
+	  		  	  	  switch(motorSTAT)
+	  		  	  	  {
+	  		  	  	  	  case 1:{
+	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT OFF     ");
+	  		  	  	  	  	  	  }break;
+
+	  		  	  	  	  case 2:{
+	  		  	  		  	  	  sprintf(stringlcdBuffer,"MOT STARTING");
+	  		  	  	  	  	  	  }break;
+
+	  		  	  	  	  case 3:{
+	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT RUNNING ");
+	  		  	  	  	  	 	 }break;
+
+	  		  	  	  	  default:{
+	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT INIT    ");
+	  		  	  	  	  	  	  }
+	  		  	  	  }
+	  		  	  	  LCD_print(stringlcdBuffer,0,0);
 
 	  		  	  	  sprintf(stringlcdBuffer,"RC: %u mV",Batt1cellAVG);
 	  		  	  	  LCD_print(stringlcdBuffer,0,1);
 
 	  		  	  	  sprintf(stringlcdBuffer,"DR: %u mV",DroneBattmV);
 	  		  	  	  LCD_print(stringlcdBuffer,0,2);
+
+	  		  	  	  sprintf(stringlcdBuffer,"Pitch: %d ",DronePitchAngle);
+	  		  	  	  LCD_print(stringlcdBuffer,0,3);
+
+	  		  	  	  sprintf(stringlcdBuffer,"Roll: %d ",DroneRollAngle);
+	  		  	  	  LCD_print(stringlcdBuffer,0,4);
 
 	  	  	  	 }break;
 
