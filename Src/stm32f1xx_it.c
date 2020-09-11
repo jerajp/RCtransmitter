@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nrf24.h"
+#include "mcp23017.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,92 +44,100 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-uint32_t T1statusdebounce=0;
-uint32_t T2statusdebounce=0;
-uint32_t T3statusdebounce=0;
-uint32_t T4statusdebounce=0;
 
-uint32_t T1statusdebounceHist=0;
-uint32_t T2statusdebounceHist=0;
-uint32_t T3statusdebounceHist=0;
-uint32_t T4statusdebounceHist=0;
+//Button inputs LEFT + - x,Y axis joystick
+uint32_t TJoyLeftXPlusStatus,TJoyLeftXMinusStatus,TJoyLeftYPlusStatus,TJoyLeftYMinusStatus;
+uint32_t TJoyLeftXPlusStatusDebounce,TJoyLeftXMinusStatusDebounce,TJoyLeftYPlusStatusDebounce,TJoyLeftYMinusStatusDebounce;
+uint32_t TJoyLeftXPlusStatusDebounceHIST,TJoyLeftXMinusStatusDebounceHIST,TJoyLeftYPlusStatusDebounceHIST,TJoyLeftYMinusStatusDebounceHIST;
+uint32_t TJoyLeftXPlusCount,TJoyLeftXMinusCount,TJoyLeftYPlusCount,TJoyLeftYMinusCount;
 
-uint32_t T1status=0;
-uint32_t T2status=0;
-uint32_t T3status=0;
-uint32_t T4status=0;
+//Button inputs RIGHT + - x,Y axis joystick
+uint32_t TJoyRightXPlusStatus,TJoyRightXMinusStatus,TJoyRightYPlusStatus,TJoyRightYMinusStatus;
+uint32_t TJoyRightXPlusStatusDebounce,TJoyRightXMinusStatusDebounce,TJoyRightYPlusStatusDebounce,TJoyRightYMinusStatusDebounce;
+uint32_t TJoyRightXPlusStatusDebounceHIST,TJoyRightXMinusStatusDebounceHIST,TJoyRightYPlusStatusDebounceHIST,TJoyRightYMinusStatusDebounceHIST;
+uint32_t TJoyRightXPlusCount,TJoyRightXMinusCount,TJoyRightYPlusCount,TJoyRightYMinusCount;
 
-uint32_t T1count=0;
-uint32_t T2count=0;
-uint32_t T3count=0;
-uint32_t T4count=0;
+//LCD buttons
+uint32_t T1Status,T2Status,T3Status,T4Status;
+uint32_t T1StatusDebounce,T2StatusDebounce,T3StatusDebounce,T4StatusDebounce;
+uint32_t T1StatusDebounceHIST,T2StatusDebounceHIST,T3StatusDebounceHIST,T4StatusDebounceHIST;
+uint32_t T1Count,T2Count,T3Count,T4Count;
 
-uint32_t TDstatusdebounce=0;
-uint32_t TLstatusdebounce=0;
-uint32_t TOGGLstatusdebounce=0;
-uint32_t TOGGDstatusdebounce=0;
+uint32_t TUpStatus,TDownStatus,TLeftStatus,TRightStatus;
+uint32_t TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRightStatusDebounce;
+uint32_t TUpStatusDebounceHIST,TDownStatusDebounceHIST,TLeftStatusDebounceHIST,TRightStatusDebounceHIST;
+uint32_t TUpCount,TDownCount,TLeftCount,TRightCount;
 
-uint32_t TDstatus=0;
-uint32_t TLstatus=0;
-uint32_t TOGGLstatus=0;
-uint32_t TOGGDstatus=0;
+//Toggle inputs
+uint32_t TOGG1statusdebounce,TOGG2statusdebounce,TOGG3statusdebounce,TOGG4statusdebounce,TOGG5statusdebounce,TOGG6statusdebounce;
+uint32_t TOGG1status,TOGG2status,TOGG3status,TOGG4status,TOGG5status,TOGG6status;
+uint32_t TOGG1count,TOGG2count,TOGG3count,TOGG4count,TOGG5count,TOGG6count;
 
-uint32_t TDcount=0;
-uint32_t TLcount=0;
-uint32_t TOGGLcount=0;
-uint32_t TOGGDcount=0;
-
+//Battery voltage
 uint32_t BattmV=0;
 uint32_t BattmVSUM=0;
 uint32_t BattmVAVG=0;
 uint32_t Batt1cellAVG;
 uint32_t batthistindx=0;
 uint32_t BAttmVhist[BATTAVERAGETIME];
+
+//Status
 uint32_t motorSTAT=0;
 
-uint32_t i;
-
+//Joystick Values
 uint32_t LjoyUPDOWN=0;
 uint32_t LjoyLEFTRIGHT=0;
 uint32_t DjoyUPDOWN=0;
 uint32_t DjoyLEFTRIGHT=0;
-
-int32_t offsetLjoyUPDOWN=0;
-int32_t offsetLjoyLEFTRIGHT=0;
-int32_t offsetDjoyUPDOWN=0;
-int32_t offsetDjoyLEFTRIGHT=0;
 
 int32_t LjoyUPDOWNzeroOffset;
 int32_t LjoyLEFTRIGHTzeroOffset;
 int32_t DjoyUPDOWNzeroOffset;
 int32_t DjoyLEFTRIGHTzeroOffset;
 
+uint32_t LjoyXmin=LJOYXMINDEF;
+uint32_t LjoyXmax=LJOYXMAXDEF;
+uint32_t LjoyYmin=LJOYYMINDEF;
+uint32_t LjoyYmax=LJOYYMAXDEF;
+//
+uint32_t RjoyXmin=RJOYXMINDEF;
+uint32_t RjoyXmax=RJOYXMAXDEF;
+uint32_t RjoyYmin=RJOYYMINDEF;
+uint32_t RjoyYmax=RJOYYMAXDEF;
+
+int32_t LjoyXtrim;
+int32_t LjoyYtrim;
+int32_t RjoyXtrim;
+int32_t RjoyYtrim;
+
 uint32_t potenc1=0;
 uint32_t potenc2=0;
 
-uint32_t offsetsetcount=0;
+//Buzzer
+uint32_t BuzzerRCBattpanic;
+uint32_t BuzzerDroneBattpanic;
+uint32_t RCBattPanicCount;
+uint32_t DroneBattPanicCount;
 
+//NRF24
 uint32_t TXdelay=0;
 uint32_t PingRXDataFlag=0;
-
 uint8_t Buttons;
-
 uint32_t DroneBattUpperByte;
 uint32_t DroneBattLowerByte;
 uint32_t DroneBattmV;
 int32_t DronePitchAngle;
 int32_t DroneRollAngle;
 uint32_t GyroCalibInProgress=0;
-
 uint32_t TotalMSGsend;
 uint32_t TotalMSGrecv;
 uint32_t MSGcount;
 uint32_t MSGprerSecond;
 uint32_t MSGLowCount;
-uint32_t ConnectWeakFlag;
-
+uint32_t ConnectWeakFlag=1;
 uint32_t  LoopCounter=0;
 
+uint32_t i;
 
 
 /* USER CODE END PV */
@@ -146,7 +155,10 @@ uint32_t  LoopCounter=0;
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
+extern TIM_HandleTypeDef htim4;
+extern I2C_HandleTypeDef hi2c2;
 
+extern MCP23017str	MCP23017DataStr;
 extern uint32_t watch1;
 extern uint32_t watch2;
 extern uint32_t watch3;
@@ -291,369 +303,687 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
-  //Read push-buttons, internal pull-up, switch to GND
-  T1status=!HAL_GPIO_ReadPin(T1_GPIO_Port,T1_Pin);
-  T2status=!HAL_GPIO_ReadPin(T2_GPIO_Port,T2_Pin);
-  T3status=!HAL_GPIO_ReadPin(T3_GPIO_Port,T3_Pin);
-  T4status=!HAL_GPIO_ReadPin(T4_GPIO_Port,T4_Pin);
-  TDstatus=!HAL_GPIO_ReadPin(DT_GPIO_Port,DT_Pin);
-  TLstatus=!HAL_GPIO_ReadPin(LT_GPIO_Port,LT_Pin);
-  TOGGLstatus=HAL_GPIO_ReadPin(TOGGL_GPIO_Port,TOGGL_Pin);
-  TOGGDstatus=HAL_GPIO_ReadPin(TOGGD_GPIO_Port,TOGGD_Pin);
-  //INTERPRET BUTTONS-----------------------------------------
+  //GET PUSHBUTTON DATA
+  mcp23017_readA(&hi2c2,MCP23017_ADDRESS_20,&MCP23017DataStr);
+  mcp23017_readB(&hi2c2,MCP23017_ADDRESS_20,&MCP23017DataStr);
 
-  //Save old values
-  T1statusdebounceHist=T1statusdebounce;
-  T2statusdebounceHist=T2statusdebounce;
-  T3statusdebounceHist=T3statusdebounce;
-  T4statusdebounceHist=T4statusdebounce;
+  //Get current Buttons/Toggle switch status
+  TOGG1status=!HAL_GPIO_ReadPin(TOGG1_GPIO_Port,TOGG1_Pin);
+  TOGG2status=!HAL_GPIO_ReadPin(TOGG2_GPIO_Port,TOGG2_Pin);
+  TOGG3status=!HAL_GPIO_ReadPin(TOGG3_GPIO_Port,TOGG3_Pin);
+  TOGG4status=!HAL_GPIO_ReadPin(TOGG4_GPIO_Port,TOGG4_Pin);
+  TOGG5status=!HAL_GPIO_ReadPin(TOGG5_GPIO_Port,TOGG5_Pin);
+  TOGG6status=!HAL_GPIO_ReadPin(TOGG6_GPIO_Port,TOGG6_Pin);
+
+  //LEFT JOYSTIC
+  TJoyLeftXPlusStatus=!MCP23017DataStr.gpioB[6];
+  TJoyLeftXMinusStatus=!MCP23017DataStr.gpioB[7];
+  TJoyLeftYPlusStatus=!MCP23017DataStr.gpioB[3];
+  TJoyLeftYMinusStatus=!MCP23017DataStr.gpioB[2];
+
+  //RIGHT JOYSTICK
+  TJoyRightXPlusStatus=!MCP23017DataStr.gpioB[1];
+  TJoyRightXMinusStatus=!MCP23017DataStr.gpioB[0];
+  TJoyRightYPlusStatus=!MCP23017DataStr.gpioB[5];
+  TJoyRightYMinusStatus=!MCP23017DataStr.gpioB[4];
+
+  //LCD buttons
+  T1Status=!MCP23017DataStr.gpioA[2];
+  T2Status=!MCP23017DataStr.gpioA[3];
+  T3Status=!MCP23017DataStr.gpioA[0];
+  T4Status=!MCP23017DataStr.gpioA[1];
+
+  TUpStatus=!MCP23017DataStr.gpioA[4];
+  TDownStatus=!MCP23017DataStr.gpioA[6];
+  TLeftStatus=!MCP23017DataStr.gpioA[5];
+  TRightStatus=!MCP23017DataStr.gpioA[7];
+
+  //DEBOUNCE ROUTINES
+
+  //Save old debounced values
+  TJoyLeftXPlusStatusDebounceHIST=TJoyLeftXPlusStatusDebounce;
+  TJoyLeftXMinusStatusDebounceHIST=TJoyLeftXMinusStatusDebounce;
+  TJoyLeftYPlusStatusDebounceHIST=TJoyLeftYPlusStatusDebounce;
+  TJoyLeftYMinusStatusDebounceHIST=TJoyLeftYMinusStatusDebounce;
+
+  TJoyRightXPlusStatusDebounceHIST=TJoyRightXPlusStatusDebounce;
+  TJoyRightXMinusStatusDebounceHIST=TJoyRightXMinusStatusDebounce;
+  TJoyRightYPlusStatusDebounceHIST=TJoyRightYPlusStatusDebounce;
+  TJoyRightYMinusStatusDebounceHIST=TJoyRightYMinusStatusDebounce;
+
+  T1StatusDebounceHIST=T1StatusDebounce;
+  T2StatusDebounceHIST=T2StatusDebounce;
+  T3StatusDebounceHIST=T3StatusDebounce;
+  T4StatusDebounceHIST=T4StatusDebounce;
+
+  TUpStatusDebounceHIST=TUpStatusDebounce;
+  TDownStatusDebounceHIST=TDownStatusDebounce;
+  TLeftStatusDebounceHIST=TLeftStatusDebounce;
+  TRightStatusDebounceHIST=TRightStatusDebounce;
 
 
-  //Set flag on T1 press
-  if(T1status==1)
+  //LEFT JOYSTICK X AXIS PLUS------------------------------------------
+  if(TJoyLeftXPlusStatus==1)
   {
-	  T1count++;
+	  TJoyLeftXPlusCount++;
   }
   else
   {
-	  T1count=0;
-	  T1statusdebounce=0;
+	  TJoyLeftXPlusCount=0;
+	  TJoyLeftXPlusStatusDebounce=0;
   }
-
-  if(T1count==BUTTONTHRESHOLD)
+  if(TJoyLeftXPlusCount==BUTTONTHRESHOLD)
   {
-	  T1statusdebounce=1;
+	  TJoyLeftXPlusStatusDebounce=1;
   }
-
-  //Set flag on T2 press
-  if(T2status==1)
+  //LEFT JOYSTICK X AXIS MINUS
+  if(TJoyLeftXMinusStatus==1)
   {
-	  T2count++;
+	  TJoyLeftXMinusCount++;
   }
   else
   {
-	  T2count=0;
-	  T2statusdebounce=0;
+	  TJoyLeftXMinusCount=0;
+	  TJoyLeftXMinusStatusDebounce=0;
   }
-
-  if(T2count==BUTTONTHRESHOLD)
+  if(TJoyLeftXMinusCount==BUTTONTHRESHOLD)
   {
-	  T2statusdebounce=1;
+	  TJoyLeftXMinusStatusDebounce=1;
   }
-
-  //Set flag on T3 press
-  if(T3status==1)
+  //LEFT JOYSTICK Y AXIS PLUS
+  if(TJoyLeftYPlusStatus==1)
   {
-	  T3count++;
+	  TJoyLeftYPlusCount++;
   }
   else
   {
-	  T3count=0;
-	  T3statusdebounce=0;
+	  TJoyLeftYPlusCount=0;
+	  TJoyLeftYPlusStatusDebounce=0;
   }
-
-
-  if(T3count==BUTTONTHRESHOLD)
+  if(TJoyLeftYPlusCount==BUTTONTHRESHOLD)
   {
-	  T3statusdebounce=1;
+	  TJoyLeftYPlusStatusDebounce=1;
   }
-
-  //Set flag on T4 press
-  if(T4status==1)
+  //LEFT JOYSTICK Y AXIS MINUS
+  if(TJoyLeftYMinusStatus==1)
   {
-	  T4count++;
+	  TJoyLeftYMinusCount++;
   }
   else
   {
-	  T4count=0;
-	  T4statusdebounce=0;
+	  TJoyLeftYMinusCount=0;
+	  TJoyLeftYMinusStatusDebounce=0;
   }
-
-  if(T4count==BUTTONTHRESHOLD)
+  if(TJoyLeftYMinusCount==BUTTONTHRESHOLD)
   {
-	  T4statusdebounce=1;
+	  TJoyLeftYMinusStatusDebounce=1;
   }
-
-  //Set flag on DTpress
-  if(TDstatus==1)
+  //RIGHT JOYSTICK X AXIS PLUS-----------------------------
+  if(TJoyRightXPlusStatus==1)
   {
-	  TDcount++;
+  	  TJoyRightXPlusCount++;
   }
   else
   {
-	  TDcount=0;
-	  TDstatusdebounce=0;
+  	  TJoyRightXPlusCount=0;
+  	  TJoyRightXPlusStatusDebounce=0;
   }
-
-  if(TDcount==BUTTONTHRESHOLD)
+  if(TJoyRightXPlusCount==BUTTONTHRESHOLD)
   {
-	  TDstatusdebounce=1;
+  	  TJoyRightXPlusStatusDebounce=1;
+  }
+  //Right JOYSTICK X AXIS MINUS
+  if(TJoyRightXMinusStatus==1)
+  {
+  	  TJoyRightXMinusCount++;
+  }
+  else
+  {
+  	  TJoyRightXMinusCount=0;
+  	  TJoyRightXMinusStatusDebounce=0;
+  }
+  if(TJoyRightXMinusCount==BUTTONTHRESHOLD)
+  {
+  	  TJoyRightXMinusStatusDebounce=1;
+  }
+  //Right JOYSTICK Y AXIS PLUS
+  if(TJoyRightYPlusStatus==1)
+  {
+  	  TJoyRightYPlusCount++;
+  }
+  else
+  {
+  	  TJoyRightYPlusCount=0;
+  	  TJoyRightYPlusStatusDebounce=0;
+  }
+  if(TJoyRightYPlusCount==BUTTONTHRESHOLD)
+  {
+  	  TJoyRightYPlusStatusDebounce=1;
+  }
+  //Right JOYSTICK Y AXIS MINUS
+  if(TJoyRightYMinusStatus==1)
+  {
+  	  TJoyRightYMinusCount++;
+  }
+  else
+  {
+  	  TJoyRightYMinusCount=0;
+  	  TJoyRightYMinusStatusDebounce=0;
+  }
+  if(TJoyRightYMinusCount==BUTTONTHRESHOLD)
+  {
+  	  TJoyRightYMinusStatusDebounce=1;
+  }
+  //T1------------------------------------------
+  if(T1Status==1)
+  {
+	  T1Count++;
+  }
+  else
+  {
+	  T1Count=0;
+	  T1StatusDebounce=0;
+  }
+  if(T1Count==BUTTONTHRESHOLD)
+  {
+	  T1StatusDebounce=1;
+  }
+  //T2--------------------------------
+  if(T2Status==1)
+  {
+	  T2Count++;
+  }
+  else
+  {
+	  T2Count=0;
+	  T2StatusDebounce=0;
+  }
+  if(T2Count==BUTTONTHRESHOLD)
+  {
+	  T2StatusDebounce=1;
+  }
+  //T3----------------------------------------
+  if(T3Status==1)
+  {
+	  T3Count++;
+  }
+  else
+  {
+	  T3Count=0;
+	  T3StatusDebounce=0;
+  }
+  if(T3Count==BUTTONTHRESHOLD)
+  {
+	  T3StatusDebounce=1;
+  }
+  //T4--------------------------------------
+  if(T4Status==1)
+  {
+	  T4Count++;
+  }
+  else
+  {
+	  T4Count=0;
+	  T4StatusDebounce=0;
+  }
+  if(T4Count==BUTTONTHRESHOLD)
+  {
+	  T4StatusDebounce=1;
+  }
+  //T up------------------------------------------
+  if(TUpStatus==1)
+  {
+       TUpCount++;
+  }
+  else
+  {
+	  TUpCount=0;
+	  TUpStatusDebounce=0;
+  }
+  if(TUpCount==BUTTONTHRESHOLD)
+  {
+	  TUpStatusDebounce=1;
+  }
+  // down--------------------------------
+  if(TDownStatus==1)
+  {
+	  TDownCount++;
+  }
+  else
+  {
+	  TDownCount=0;
+	  TDownStatusDebounce=0;
+  }
+  if(TDownCount==BUTTONTHRESHOLD)
+  {
+	  TDownStatusDebounce=1;
+  }
+  //T left----------------------------------------
+  if(TLeftStatus==1)
+  {
+	  TLeftCount++;
+  }
+  else
+  {
+	  TLeftCount=0;
+	  TLeftStatusDebounce=0;
+  }
+  if(TLeftCount==BUTTONTHRESHOLD)
+  {
+	  TLeftStatusDebounce=1;
+  }
+  //T right--------------------------------------
+  if(TRightStatus==1)
+  {
+	  TRightCount++;
+  }
+  else
+  {
+	  TRightCount=0;
+	  TRightStatusDebounce=0;
+  }
+  if(TRightCount==BUTTONTHRESHOLD)
+  {
+	  TRightStatusDebounce=1;
   }
 
-  //Set flag on LT press
-    if(TLstatus==1)
-    {
-  	  TLcount++;
-    }
-    else
-    {
-  	  TLcount=0;
-  	  TLstatusdebounce=0;
-    }
+  //Toggle 1-----------------------------------------
+  if(TOGG1status==1)
+  {
+    TOGG1count++;
+  }
+  else
+  {
+    TOGG1count=0;
+    TOGG1statusdebounce=0;
+  }
 
-    if(TLcount==BUTTONTHRESHOLD)
-    {
-  	  TLstatusdebounce=1;
-    }
+  if(TOGG1count==BUTTONTHRESHOLD)
+  {
+	  TOGG1statusdebounce=1;
+  }
 
-    //Set flag on TOGG1 press
-      if(TOGGLstatus==1)
-      {
-    	  TOGGLcount++;
-      }
-      else
-      {
-    	  TOGGLcount=0;
-    	  TOGGLstatusdebounce=0;
-      }
+  //Toggle 2
+  if(TOGG2status==1)
+  {
+    TOGG2count++;
+  }
+  else
+  {
+    TOGG2count=0;
+    TOGG2statusdebounce=0;
+  }
 
-      if(TOGGLcount==BUTTONTHRESHOLD)
-      {
-    	  TOGGLstatusdebounce=1;
-      }
+  if(TOGG2count==BUTTONTHRESHOLD)
+  {
+	  TOGG2statusdebounce=1;
+  }
 
-      //Set flag on TOGG2 press
-        if(TOGGDstatus==1)
-        {
-      	  TOGGDcount++;
-        }
-        else
-        {
-      	  TOGGDcount=0;
-      	  TOGGDstatusdebounce=0;
-        }
+  //Toggle 3
+  if(TOGG3status==1)
+  {
+    TOGG3count++;
+  }
+  else
+  {
+    TOGG3count=0;
+    TOGG3statusdebounce=0;
+  }
 
-        if(TOGGDcount==BUTTONTHRESHOLD)
-        {
-      	  TOGGDstatusdebounce=1;
-        }
+  if(TOGG3count==BUTTONTHRESHOLD)
+  {
+	  TOGG3statusdebounce=1;
+  }
 
-     //LEDS
+  //Toggle 4
+  if(TOGG4status==1)
+  {
+    TOGG4count++;
+  }
+  else
+  {
+    TOGG4count=0;
+    TOGG4statusdebounce=0;
+  }
 
-     //LED 1 LOW BATT
-     if( (Batt1cellAVG < MINREMOTEBATT) ||  (DroneBattmV < MINDRONEBATT) ) LED1ON;
-     else LED1OFF;
+  if(TOGG4count==BUTTONTHRESHOLD)
+  {
+	  TOGG4statusdebounce=1;
+  }
 
-     //LED2 RC connection OK
-     if(ConnectWeakFlag)LED2OFF;
-     else LED2ON;
+  //Toggle 5
+  if(TOGG5status==1)
+  {
+    TOGG5count++;
+  }
+  else
+  {
+    TOGG5count=0;
+    TOGG5statusdebounce=0;
+  }
 
-     //LED1ON;
-     //LED1OFF;
+  if(TOGG5count==BUTTONTHRESHOLD)
+  {
+	  TOGG5statusdebounce=1;
+  }
 
+  //Tpggle 6
+  if(TOGG6status==1)
+  {
+    TOGG6count++;
+  }
+  else
+  {
+    TOGG6count=0;
+    TOGG6statusdebounce=0;
+  }
 
-     //LED3 GYRO CALIB INDIC
-     if(GyroCalibInProgress)LED3ON;
-     else LED3OFF;
-
-     //LED4ON;
-     //LED4OFF;
-
-     // T1 button Edge to 1
-     if(T1statusdebounceHist!=T1statusdebounce && T1statusdebounce==1)
-     {
-
-     }
-
-     // T2 button Edge to 1
-     if(T2statusdebounceHist!=T2statusdebounce && T2statusdebounce==1)
-     {
-
-     }
-
-     // T3 button Edge to 1
-     if(T3statusdebounceHist!=T3statusdebounce && T3statusdebounce==1)
-     {
-
-     }
-
-     // T4 button Edge to 1
-     if(T4statusdebounceHist!=T4statusdebounce && T4statusdebounce==1)
-     {
-    	 LCDMenu++;
-    	 if(LCDMenu>LCDLASTMENU)LCDMenu=0;
-     }
-
-
-     //ADC interpret---------------------------------------------------------------------------------------------
-
-     //Battery value 12k/6.8k divider----------------------------------
-     BattmV=(adcDataArray[6]*3300*2.735)/4095;
-
-     //Battery average value--------------------------------------------
-     BAttmVhist[batthistindx]=BattmV;
-     batthistindx++;
-     if(batthistindx>=BATTAVERAGETIME)batthistindx=0;
-
-     BattmVSUM=0;
-
-     for(i=0;i<BATTAVERAGETIME;i++)
-     {
-    	 BattmVSUM+=BAttmVhist[i];
-     }
-
-     BattmVAVG=BattmVSUM/(BATTAVERAGETIME);
-     Batt1cellAVG=BattmVAVG/2; //display average voltage per 1 li-ion cell
+  if(TOGG6count==BUTTONTHRESHOLD)
+  {
+	  TOGG6statusdebounce=1;
+  }
 
 
-     //Joysticks---------------------------------------------------------------
+  //LEFT JOYSTICK X AXIS MINUS EVENT
+  if(TJoyLeftXMinusStatusDebounceHIST!=TJoyLeftXMinusStatusDebounce && TJoyLeftXMinusStatusDebounce==1)
+  {
+	  LjoyXtrim-=TRIMJOYSTEP;
+  }
 
-     LjoyUPDOWNzeroOffset=adcDataArray[0];
-     LjoyLEFTRIGHTzeroOffset=adcDataArray[1];
-     DjoyUPDOWNzeroOffset=adcDataArray[2];
-     DjoyLEFTRIGHTzeroOffset=adcDataArray[3];
+  //LEFT JOYSTICK X AXIS PLUS EVENT
+  if(TJoyLeftXPlusStatusDebounceHIST!=TJoyLeftXPlusStatusDebounce && TJoyLeftXPlusStatusDebounce==1)
+  {
+	  LjoyXtrim+=TRIMJOYSTEP;
+  }
 
-     //Zeroing joysticks to center
-     if(T1statusdebounce==1 && T3statusdebounce==1)
-     {
-       offsetsetcount++;
+  //LEFT JOYSTICK Y AXIS MINUS EVENT
+  if(TJoyLeftYMinusStatusDebounceHIST!=TJoyLeftYMinusStatusDebounce && TJoyLeftYMinusStatusDebounce==1)
+  {
+	  LjoyYtrim-=TRIMJOYSTEP;
+  }
 
-       if(offsetsetcount==5000)
-       {
-         offsetLjoyUPDOWN=2047-LjoyUPDOWNzeroOffset;
-         offsetLjoyLEFTRIGHT=2047-LjoyLEFTRIGHTzeroOffset;
-     	 offsetDjoyUPDOWN=2047-DjoyUPDOWNzeroOffset;
-     	 offsetDjoyLEFTRIGHT=2047-DjoyLEFTRIGHTzeroOffset;
-        }
-     }
-     else offsetsetcount=0;
+  //LEFT JOYSTICK Y AXIS PLUS EVENT
+  if(TJoyLeftYPlusStatusDebounceHIST!=TJoyLeftYPlusStatusDebounce && TJoyLeftYPlusStatusDebounce==1)
+  {
+	  LjoyYtrim+=TRIMJOYSTEP;
+  }
+  //RIGHT JOYSTICK X AXIS MINUS EVENT
+  if(TJoyRightXMinusStatusDebounceHIST!=TJoyRightXMinusStatusDebounce && TJoyRightXMinusStatusDebounce==1)
+  {
+	  RjoyXtrim-=TRIMJOYSTEP;
+  }
 
-     LjoyUPDOWNzeroOffset+=offsetLjoyUPDOWN;
-     LjoyLEFTRIGHTzeroOffset+=offsetLjoyLEFTRIGHT;
-     DjoyUPDOWNzeroOffset+=offsetDjoyUPDOWN;
-     DjoyLEFTRIGHTzeroOffset+=offsetDjoyLEFTRIGHT;
+  //RIGHT JOYSTICK X AXIS PLUS EVENT
+  if(TJoyRightXPlusStatusDebounceHIST!=TJoyRightXPlusStatusDebounce && TJoyRightXPlusStatusDebounce==1)
+  {
+	  RjoyXtrim+=TRIMJOYSTEP;
+  }
 
-     if(LjoyUPDOWNzeroOffset< 0)LjoyUPDOWNzeroOffset=0;
-     if(LjoyLEFTRIGHTzeroOffset<0)LjoyLEFTRIGHTzeroOffset=0;
-     if(DjoyUPDOWNzeroOffset<0)DjoyUPDOWNzeroOffset=0;
-     if(DjoyLEFTRIGHTzeroOffset<0)DjoyLEFTRIGHTzeroOffset=0;
+  //RIGHT JOYSTICK Y AXIS MINUS EVENT
+  if(TJoyRightYMinusStatusDebounceHIST!=TJoyRightYMinusStatusDebounce && TJoyRightYMinusStatusDebounce==1)
+  {
+	  RjoyYtrim-=TRIMJOYSTEP;
+  }
 
-     if(LjoyUPDOWNzeroOffset>4095)LjoyUPDOWNzeroOffset=4095;
-     if(LjoyLEFTRIGHTzeroOffset>4095)LjoyLEFTRIGHTzeroOffset=4095;
-     if(DjoyUPDOWNzeroOffset>4095)DjoyUPDOWNzeroOffset=4095;
-     if(DjoyLEFTRIGHTzeroOffset>4095)DjoyLEFTRIGHTzeroOffset=4095;
-
-     //scaling 0-100%
-     LjoyUPDOWN=LjoyUPDOWNzeroOffset*100/4095;
-     LjoyLEFTRIGHT=LjoyLEFTRIGHTzeroOffset*100/4095;
-     DjoyUPDOWN=DjoyUPDOWNzeroOffset*100/4095;
-     DjoyLEFTRIGHT=DjoyLEFTRIGHTzeroOffset*100/4095;
-
-     //Potenciometers (inverted logic-HW)---------------------------
-     potenc1=100-adcDataArray[4]*100/4095;
-	 potenc2=100-adcDataArray[5]*100/4095;
-     //------------------------------------------------------------------------------------------------------------
-
-	 //Save Buttons into 8bits
-	 Buttons=(TOGGLstatusdebounce<<7) +  (TOGGDstatusdebounce<<6) + (T1statusdebounce<<5) + (T2statusdebounce<<4) + (T3statusdebounce<<3) + (T4statusdebounce<<2) + (TLstatusdebounce<<1) + TDstatusdebounce;
+  //RIGHT JOYSTICK Y AXIS PLUS EVENT
+  if(TJoyRightYPlusStatusDebounceHIST!=TJoyRightYPlusStatusDebounce && TJoyRightYPlusStatusDebounce==1)
+  {
+	  RjoyYtrim+=TRIMJOYSTEP;
+  }
 
 
-	 //NRF24---------------------------------------------------------------------------------------
-	 if(MainInitDoneFlag)
+  //T1 EVENT
+  if(T1StatusDebounceHIST!=T1StatusDebounce && T1StatusDebounce==1)
+  {
+
+  }
+
+  //T2 EVENT
+  if(T2StatusDebounceHIST!=T2StatusDebounce && T2StatusDebounce==1)
+  {
+
+  }
+
+  //T3 EVENT
+  if(T3StatusDebounceHIST!=T3StatusDebounce && T3StatusDebounce==1)
+  {
+
+  }
+
+  //T4 EVENT
+  if(T4StatusDebounceHIST!=T4StatusDebounce && T4StatusDebounce==1)
+  {
+
+  }
+
+  //T UP EVENT
+  if(TUpStatusDebounceHIST!=TUpStatusDebounce && TUpStatusDebounce==1)
+  {
+
+  }
+
+  //T DOWN EVENT
+  if(TDownStatusDebounceHIST!=TDownStatusDebounce && TDownStatusDebounce==1)
+  {
+
+  }
+
+  //T LEFT EVENT
+  if(TLeftStatusDebounceHIST!=TLeftStatusDebounce && TLeftStatusDebounce==1)
+  {
+	  if(LCDMenu==0)LCDMenu=LCDLASTMENU;
+	  else LCDMenu--;
+  }
+
+  //T RIGHT EVENT
+  if(TRightStatusDebounceHIST!=TRightStatusDebounce && TRightStatusDebounce==1)
+  {
+	  LCDMenu++;
+	  if(LCDMenu>LCDLASTMENU)LCDMenu=0;
+  }
+
+
+  //LEDS-----------------------------------------------------------------------------------------
+  if(MainInitDoneFlag)
+  {
+	  //LED1
+	  LED1OFF;
+
+	  //LED2 RC connection OK
+	  if(ConnectWeakFlag)LED2OFF;
+	  else LED2ON;
+
+	  //LED 3 LOW BATT
+	  if( (Batt1cellAVG < MINREMOTEBATT) ||  (DroneBattmV < MINDRONEBATT) ) LED3ON;
+	  else LED3OFF;
+
+	  //LED4 GYRO CALIB INDIC
+	  if(GyroCalibInProgress)LED4ON;
+	  else LED4OFF;
+  }
+
+
+  //ADC interpret---------------------------------------------------------------------------------------------
+  //Battery value 12k/6.8k divider----------------------------------
+  BattmV=(adcDataArray[6]*3300*2.735)/4095;
+
+  //Battery average value--------------------------------------------
+  BAttmVhist[batthistindx]=BattmV;
+  batthistindx++;
+  if(batthistindx>=BATTAVERAGETIME)batthistindx=0;
+
+  BattmVSUM=0;
+
+  for(i=0;i<BATTAVERAGETIME;i++)
+  {
+	 BattmVSUM+=BAttmVhist[i];
+  }
+
+  BattmVAVG=BattmVSUM/(BATTAVERAGETIME);
+  Batt1cellAVG=BattmVAVG/2; //display average voltage per 1 li-ion cell
+
+
+ //Joysticks---------------------------------------------------------------
+
+  //HW Specific wiring
+ LjoyUPDOWNzeroOffset=4095-adcDataArray[1];
+ LjoyLEFTRIGHTzeroOffset=adcDataArray[0];
+ DjoyUPDOWNzeroOffset=adcDataArray[3];
+ DjoyLEFTRIGHTzeroOffset=4095-adcDataArray[2];
+
+ LjoyUPDOWNzeroOffset+=LjoyYtrim;
+ LjoyLEFTRIGHTzeroOffset+=LjoyXtrim;
+ DjoyUPDOWNzeroOffset+=RjoyYtrim;
+ DjoyLEFTRIGHTzeroOffset+=RjoyXtrim;
+
+ //zasicenja
+ if(LjoyUPDOWNzeroOffset > (int32_t)(4095) )LjoyUPDOWNzeroOffset=4095;
+ if(LjoyUPDOWNzeroOffset < (int32_t)(0) )LjoyUPDOWNzeroOffset=0;
+ if(LjoyLEFTRIGHTzeroOffset > (int32_t)(4095) )LjoyLEFTRIGHTzeroOffset=4095;
+ if(LjoyLEFTRIGHTzeroOffset < (int32_t)(0) )LjoyLEFTRIGHTzeroOffset=0;
+ if(DjoyUPDOWNzeroOffset > (int32_t)(4095) )DjoyUPDOWNzeroOffset=4095;
+ if(DjoyUPDOWNzeroOffset < (int32_t)(0) )DjoyUPDOWNzeroOffset=0;
+ if(DjoyLEFTRIGHTzeroOffset > (int32_t)(4095) )DjoyLEFTRIGHTzeroOffset=4095;
+ if(DjoyLEFTRIGHTzeroOffset < (int32_t)(0) )DjoyLEFTRIGHTzeroOffset=0;
+
+ //scaling
+ LjoyUPDOWN=ScaleJoysticks(LjoyYmin, LjoyYmax,LjoyUPDOWNzeroOffset);
+ LjoyLEFTRIGHT=ScaleJoysticks(LjoyXmin, LjoyXmax, LjoyLEFTRIGHTzeroOffset);
+ DjoyUPDOWN=ScaleJoysticks(RjoyYmin, RjoyYmax, DjoyUPDOWNzeroOffset);
+ DjoyLEFTRIGHT=ScaleJoysticks(RjoyXmin, RjoyXmax, DjoyLEFTRIGHTzeroOffset);
+
+
+ //Potenciometers (inverted logic-HW)---------------------------
+ potenc1=100-adcDataArray[4]*100/4095;
+ potenc2=100-adcDataArray[5]*100/4095;
+ //------------------------------------------------------------------------------------------------------------
+
+ //Save Buttons into 8bits
+ Buttons=(TOGG1statusdebounce<<7) +  (TOGG2statusdebounce<<6) + (TOGG3statusdebounce<<5) + (TOGG4statusdebounce<<4) + (TOGG5statusdebounce<<3) + (TOGG6statusdebounce<<2) + (0<<1) + 0;
+
+ //Buzzer
+ if( Batt1cellAVG < MINREMOTEBATT) BuzzerRCBattpanic=1;
+ else BuzzerRCBattpanic=0;
+
+ if(DroneBattmV < MINDRONEBATT && ConnectWeakFlag==0)BuzzerDroneBattpanic=1;
+ else BuzzerDroneBattpanic=0;
+
+ if(BuzzerRCBattpanic)
+ {
+	 RCBattPanicCount++;
+	 if(RCBattPanicCount>10000)HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
+	 if(RCBattPanicCount>11000){HAL_TIM_PWM_Stop(&htim4,TIM_CHANNEL_2); RCBattPanicCount=0;}
+ }
+
+ else if(BuzzerDroneBattpanic)
+ {
+	 DroneBattPanicCount++;
+	 if(DroneBattPanicCount>2000)HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
+	 if(DroneBattPanicCount>2500){HAL_TIM_PWM_Stop(&htim4,TIM_CHANNEL_2); DroneBattPanicCount=0;}
+ }
+ else
+ {
+	 HAL_TIM_PWM_Stop(&htim4,TIM_CHANNEL_2);//buzzer stop
+	 RCBattPanicCount=0;
+	 DroneBattPanicCount=0;
+ }
+
+ //NRF24---------------------------------------------------------------------------------------
+ if(MainInitDoneFlag)
+ {
+
+	 switch(TXdelay)
+	 {
+		 case 0:
+				 {
+					//SET TX MODE
+					nRF24_CE_L();//END RX
+					nRF24_SetOperationalMode(nRF24_MODE_TX);
+					PingRXDataFlag=0;
+				 }break;
+
+		 case 5:
+				 {
+					//TRANSMIT
+					TotalMSGsend++;
+
+					//SEND DATA TO DRONE
+					nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
+					nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
+					nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
+					nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
+					nRF24_payloadTX[4] = (uint8_t)(potenc1);
+					nRF24_payloadTX[5] = (uint8_t)(potenc2);
+					nRF24_payloadTX[6] = (uint8_t)(Buttons);
+
+					// Transmit a packet
+					nRF24_TransmitPacket(nRF24_payloadTX, 7);
+				 }break;
+
+		 case 6:
+				 {
+					 //SET RX MODE
+					nRF24_SetOperationalMode(nRF24_MODE_RX);
+					nRF24_CE_H(); //Start RX)
+
+				 }break;
+
+		 case 7:
+				 {
+					PingRXDataFlag=1;
+
+				 }break;
+	 }
+
+	 if(PingRXDataFlag)//Ping for RX data
 	 {
 
-		 switch(TXdelay)
+		 if ((nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) )
 		 {
-	 	 	 case 0:
-	 	 	 	 	 {
-	 	 	 	 		//SET TX MODE
-	 	 	 	 		nRF24_CE_L();//END RX
-						nRF24_SetOperationalMode(nRF24_MODE_TX);
-						PingRXDataFlag=0;
-	 	 	 	 	 }break;
+			// Get a payload from the transceiver
+			nRF24_ReadPayload(nRF24_payloadRX, &RXstpaketov);
 
-		 	 case 5:
-		 	 	 	 {
-		 	 	 		//TRANSMIT
-		 	 	 		TotalMSGsend++;
+			//Clear all pending IRQ flags
+			nRF24_ClearIRQFlags();
 
-		 	 	 		//SEND DATA TO DRONE
-		 	 	 		nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
-		 	 	 		nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
-		 	 	 		nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
-		 	 	 		nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
-		 	 	 		nRF24_payloadTX[4] = (uint8_t)(potenc1);
-		 	 	 		nRF24_payloadTX[5] = (uint8_t)(potenc2);
-		 	 	 		nRF24_payloadTX[6] = (uint8_t)(Buttons);
+			DroneBattLowerByte=nRF24_payloadRX[0];
+			DroneBattUpperByte=nRF24_payloadRX[1];
+			DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
 
-		 	 	 		// Transmit a packet
-		 	 	 		nRF24_TransmitPacket(nRF24_payloadTX, 7);
-		 	 	 	 }break;
+			DronePitchAngle=nRF24_payloadRX[2];
+			DroneRollAngle=nRF24_payloadRX[3];
 
-		 	 case 6:
-		 	 	 	 {
-		 	 	 		 //SET RX MODE
-		 				nRF24_SetOperationalMode(nRF24_MODE_RX);
-		 				nRF24_CE_H(); //Start RX)
+			if(nRF24_payloadRX[4] & 0x1)DronePitchAngle*=(-1);
+			else if((nRF24_payloadRX[4]>>1)& 0x1)DroneRollAngle*=(-1);
 
-		 	 	 	 }break;
+			GyroCalibInProgress=(nRF24_payloadRX[4]>>2) & 0x1;
 
-		 	 case 7:
-		 	 	 	 {
-		 	 	 		PingRXDataFlag=1;
+			motorSTAT=(nRF24_payloadRX[4]>>3) & 0x7; //last 3 bits
 
-		 	 	 	 }break;
+			TotalMSGrecv++;
+			MSGcount++;
 		 }
+	 }
 
-		 if(PingRXDataFlag)//Ping for RX data
+	 //MSG PER SECOND DIAGNOSTICS
+	 LoopCounter++;
+	 if(LoopCounter==1000)
+	 {
+		 MSGprerSecond=MSGcount;
+
+		 if(MSGcount<MINMSGPERSEC)
 		 {
-
-	 	 	 if ((nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) )
-	 	 	 {
-	 	 	 	// Get a payload from the transceiver
-	 	 	 	nRF24_ReadPayload(nRF24_payloadRX, &RXstpaketov);
-
-	 	 	 	//Clear all pending IRQ flags
-	 	 	 	nRF24_ClearIRQFlags();
-
-	 	 	 	DroneBattLowerByte=nRF24_payloadRX[0];
-	 	 	 	DroneBattUpperByte=nRF24_payloadRX[1];
-	 	 	 	DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
-
-	 	 	 	DronePitchAngle=nRF24_payloadRX[2];
-	 	 	 	DroneRollAngle=nRF24_payloadRX[3];
-
-				if(nRF24_payloadRX[4] & 0x1)DronePitchAngle*=(-1);
-				else if((nRF24_payloadRX[4]>>1)& 0x1)DroneRollAngle*=(-1);
-
-				GyroCalibInProgress=(nRF24_payloadRX[4]>>2) & 0x1;
-
-				motorSTAT=(nRF24_payloadRX[4]>>3) & 0x7; //last 3 bits
-
-				TotalMSGrecv++;
-	 	 	 	MSGcount++;
-	 	 	 }
+			 MSGLowCount++;
+			 ConnectWeakFlag=1;
 		 }
+		 else  ConnectWeakFlag=0;
 
-		 //MSG PER SECOND DIAGNOSTICS
-		 LoopCounter++;
-		 if(LoopCounter==1000)
-		 {
-			 MSGprerSecond=MSGcount;
-
-			 if(MSGcount<MINMSGPERSEC)
-		     {
-				 MSGLowCount++;
-				 ConnectWeakFlag=1;
-		     }
-			 else  ConnectWeakFlag=0;
-
-			 MSGcount=0;
-			 LoopCounter=0;
-		 }
-		 TXdelay++;
-		 if(TXdelay==TXPERIOD)TXdelay=0;
-	 }//----------------------------------------------------------------------------------------------
+		 MSGcount=0;
+		 LoopCounter=0;
+	 }
+	 TXdelay++;
+	 if(TXdelay==TXPERIOD)TXdelay=0;
+ }//----------------------------------------------------------------------------------------------
 
 
   /* USER CODE END SysTick_IRQn 1 */
@@ -681,5 +1011,18 @@ void DMA1_Channel1_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+uint32_t ScaleJoysticks(uint32_t min, uint32_t max, uint32_t value)
+{
+	uint32_t temp;
+
+	if(value<min)value=min;
+
+	temp=( (value-min)*100)/(max-min);
+
+	if(temp>100)temp=100;
+
+	return temp;
+
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

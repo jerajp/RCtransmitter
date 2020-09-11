@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "nokia5110_LCD.h"
 #include "nrf24.h"
+#include "mcp23017.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,9 +47,11 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
-I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 
 SPI_HandleTypeDef hspi1;
+
+TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 uint32_t test1;
@@ -67,15 +70,11 @@ uint32_t watch6;
 
 char stringlcdBuffer[20];
 
-
-extern uint32_t T1statusdebounce;
-extern uint32_t T2statusdebounce;
-extern uint32_t T3statusdebounce;
-extern uint32_t T4statusdebounce;
-extern uint32_t TDstatusdebounce;
-extern uint32_t TLstatusdebounce;
-extern uint32_t TOGGLstatusdebounce;
-extern uint32_t TOGGDstatusdebounce;
+extern uint32_t TOGG1statusdebounce,TOGG2statusdebounce,TOGG3statusdebounce,TOGG4statusdebounce,TOGG5statusdebounce,TOGG6statusdebounce;
+extern uint32_t TJoyLeftXPlusStatusDebounce,TJoyLeftXMinusStatusDebounce,TJoyLeftYPlusStatusDebounce,TJoyLeftYMinusStatusDebounce;
+extern uint32_t TJoyRightXPlusStatusDebounce,TJoyRightXMinusStatusDebounce,TJoyRightYPlusStatusDebounce,TJoyRightYMinusStatusDebounce;
+extern uint32_t T1StatusDebounce,T2StatusDebounce,T3StatusDebounce,T4StatusDebounce;
+extern uint32_t TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRightStatusDebounce;
 
 uint16_t adcDataArray[7];
 
@@ -87,16 +86,19 @@ extern uint32_t LjoyLEFTRIGHT;
 extern uint32_t DjoyUPDOWN;
 extern uint32_t DjoyLEFTRIGHT;
 
-extern uint32_t offsetLjoyUPDOWN;
-extern uint32_t offsetLjoyLEFTRIGHT;
-extern uint32_t offsetDjoyUPDOWN;
-extern uint32_t offsetDjoyLEFTRIGHT;
+extern int32_t LjoyUPDOWNzeroOffset;
+extern int32_t LjoyLEFTRIGHTzeroOffset;
+extern int32_t DjoyUPDOWNzeroOffset;
+extern int32_t DjoyLEFTRIGHTzeroOffset;
 
 extern uint32_t potenc1;
 extern uint32_t potenc2;
 
 uint32_t LCDMenu=0;
 uint32_t LCDMenuHist=0;
+
+//MCP23017
+MCP23017str	MCP23017DataStr;
 
 //NRF24
 uint8_t nRF24_payloadTX[32]; //TX buffer
@@ -118,6 +120,7 @@ extern uint32_t MSGprerSecond;
 extern uint32_t MSGLowCount;
 
 uint32_t MainInitDoneFlag=0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,8 +128,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_I2C2_Init(void);
+static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -170,22 +174,35 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
-  MX_I2C1_Init();
   MX_SPI1_Init();
+  MX_I2C2_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_ADCEx_Calibration_Start(&hadc1);
 
   HAL_ADC_Start_DMA(&hadc1,adcDataArray, 7);
 
+  //Lightshow
+  LED1ON;
+  LED2ON;
+  LED3ON;
+  LED4ON;
+  HAL_Delay(1000);
+  LED1OFF;
+  LED2OFF;
+  LED3OFF;
+  LED4OFF;
+
   //lcd init pins
   LCD_setRST(LCD_RST_GPIO_Port, LCD_RST_Pin);
-  LCD_setCE(LCD_CE_GPIO_Port, LCD_CE_Pin);
   LCD_setDC(LCD_COMM_GPIO_Port, LCD_COMM_Pin);
+  LCD_setCE(LCD_CE_GPIO_Port, LCD_CE_Pin);
   LCD_setDIN(LCD_DATA_GPIO_Port, LCD_DATA_Pin);
   LCD_setCLK(LCD_CLK_GPIO_Port, LCD_CLK_Pin);
 
   LCD_init(); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
+
 
   //NRF24INIT
   SPI1->CR1|=SPI_CR1_SPE; //enable SPI
@@ -229,13 +246,10 @@ int main(void)
   // Wake the transceiver
   nRF24_SetPowerMode(nRF24_PWR_UP);
 
-  MainInitDoneFlag=1;
+  //MCP23017 intit
+  mcp23017_init(&hi2c2,MCP23017_ADDRESS_20);
 
-  //Zeroing Joysticks on startup------------------------------------------------
-  offsetLjoyUPDOWN=2047-adcDataArray[0];
-  offsetLjoyLEFTRIGHT=2047-adcDataArray[1];
-  offsetDjoyUPDOWN=2047-adcDataArray[2];
-  offsetDjoyLEFTRIGHT=2047-adcDataArray[3];
+  MainInitDoneFlag=1;
 
 
   /* USER CODE END 2 */
@@ -305,29 +319,63 @@ int main(void)
 
 	  	  	  	 }break;
 
+	  	case 2:{
 
-	  	  case 2:{
-	  		  	  	  //Diagnostics Inputs
-	  		  	  	  sprintf(stringlcdBuffer,"INPUTS");
+			  	  sprintf(stringlcdBuffer,"Toggle:%u%u%u%u%u%u",TOGG1statusdebounce,TOGG2statusdebounce,TOGG3statusdebounce,TOGG4statusdebounce,TOGG5statusdebounce,TOGG6statusdebounce);
+			  	  LCD_print(stringlcdBuffer,0,0);
+
+			  	  sprintf(stringlcdBuffer,"Pot: %u %u    ",potenc1,potenc2);
+			  	  LCD_print(stringlcdBuffer,0,1);
+
+			  	  sprintf(stringlcdBuffer,"%u %u %u %u    ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
+			  	  LCD_print(stringlcdBuffer,0,2);
+
+			  	  sprintf(stringlcdBuffer,"LY %d %d    ",LjoyUPDOWNzeroOffset,LjoyLEFTRIGHTzeroOffset);
+				  LCD_print(stringlcdBuffer,0,3);
+
+			  	  sprintf(stringlcdBuffer,"RY %d %d    ",DjoyUPDOWNzeroOffset,DjoyLEFTRIGHTzeroOffset);
+			  	  LCD_print(stringlcdBuffer,0,4);
+
+
+			  	  //sprintf(stringlcdBuffer,"Jo: %d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
+			  	  //LCD_print(stringlcdBuffer,0,4);
+
+	  		   }break;
+
+	  	  case 3:{
+	  			  	  //Diagnostics Inputs
+	  		  	  	  sprintf(stringlcdBuffer,"Joystick Butt");
 	  			  	  LCD_print(stringlcdBuffer,0,0);
 
-	  		  	  	  sprintf(stringlcdBuffer,"Buttons:");
-		  			  LCD_print(stringlcdBuffer,0,1);
+	  		  	  	  sprintf(stringlcdBuffer,"LX- %d LX+ %d",TJoyLeftXMinusStatusDebounce,TJoyLeftXPlusStatusDebounce);
+	  			  	  LCD_print(stringlcdBuffer,0,1);
 
-		  			  sprintf(stringlcdBuffer,"%u%u%u%u %u%u %u%u",T1statusdebounce,T2statusdebounce,T3statusdebounce,T4statusdebounce,TLstatusdebounce,TDstatusdebounce,TOGGLstatusdebounce,TOGGDstatusdebounce);
-		  			  LCD_print(stringlcdBuffer,0,2);
+	  		  	  	  sprintf(stringlcdBuffer,"LY- %d LY+ %d",TJoyLeftYMinusStatusDebounce,TJoyLeftYPlusStatusDebounce);
+	  			  	  LCD_print(stringlcdBuffer,0,2);
 
-	  		  	  	  sprintf(stringlcdBuffer,"Pot: %u %u",potenc1,potenc2);
-		  			  LCD_print(stringlcdBuffer,0,3);
+	  		  	  	  sprintf(stringlcdBuffer,"RX- %d RX+ %d",TJoyRightXMinusStatusDebounce,TJoyRightXPlusStatusDebounce);
+	  			  	  LCD_print(stringlcdBuffer,0,3);
 
-		  			  sprintf(stringlcdBuffer,"%u %u %u %u  ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
-		  			  LCD_print(stringlcdBuffer,0,4);
+	  		  	  	  sprintf(stringlcdBuffer,"RY- %d RY+ %d",TJoyRightYMinusStatusDebounce,TJoyRightYPlusStatusDebounce);
+	  			  	  LCD_print(stringlcdBuffer,0,4);
 
-		  			  sprintf(stringlcdBuffer,"%d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
-		  			  LCD_print(stringlcdBuffer,0,5);
+	  		  	  	  //sprintf(stringlcdBuffer,"%d %d %d %d",watch1,watch2,watch3,watch4);
+	  			  	  //LCD_print(stringlcdBuffer,0,5);
 
 	  	  	  	 }break;
 
+	  	case 4:{
+		  	  	  //Diagnostics Inputs
+	  	  	  	  sprintf(stringlcdBuffer,"LCD Buttons");
+	  	  	  	  LCD_print(stringlcdBuffer,0,0);
+
+		  	  	  sprintf(stringlcdBuffer,"Tb %d %d %d %d",T1StatusDebounce,T2StatusDebounce,T3StatusDebounce,T4StatusDebounce);
+			  	  LCD_print(stringlcdBuffer,0,1);
+
+		  	  	  sprintf(stringlcdBuffer,"Ts %d %d %d %d",TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRightStatusDebounce);
+			  	  LCD_print(stringlcdBuffer,0,2);
+
+	  		   }break;
 	  }
 
 	  //test1=DWT->CYCCNT;
@@ -478,36 +526,36 @@ static void MX_ADC1_Init(void)
 }
 
 /**
-  * @brief I2C1 Initialization Function
+  * @brief I2C2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_I2C1_Init(void)
+static void MX_I2C2_Init(void)
 {
 
-  /* USER CODE BEGIN I2C1_Init 0 */
+  /* USER CODE BEGIN I2C2_Init 0 */
 
-  /* USER CODE END I2C1_Init 0 */
+  /* USER CODE END I2C2_Init 0 */
 
-  /* USER CODE BEGIN I2C1_Init 1 */
+  /* USER CODE BEGIN I2C2_Init 1 */
 
-  /* USER CODE END I2C1_Init 1 */
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN I2C1_Init 2 */
+  /* USER CODE BEGIN I2C2_Init 2 */
 
-  /* USER CODE END I2C1_Init 2 */
+  /* USER CODE END I2C2_Init 2 */
 
 }
 
@@ -549,6 +597,55 @@ static void MX_SPI1_Init(void)
 
 }
 
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 9;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 5000;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 800;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+  HAL_TIM_MspPostInit(&htim4);
+
+}
+
 /** 
   * Enable DMA controller clock
   */
@@ -584,12 +681,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LCD_CLK_Pin 
-                          |LCD_CE_Pin|LCD_DATA_Pin|LED3_Pin|LED4_Pin 
-                          |LED1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LCD_RST_Pin|LCD_CLK_Pin|LCD_CE_Pin|LCD_DATA_Pin 
+                          |LED3_Pin|SPI_NR24_CSN_Pin|LED4_Pin|LED1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LCD_COMM_GPIO_Port, LCD_COMM_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LCD_COMM_Pin|SPI_NR24_CE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED2_Pin */
   GPIO_InitStruct.Pin = LED2_Pin;
@@ -598,29 +694,23 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED2_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DT_Pin LT_Pin */
-  GPIO_InitStruct.Pin = DT_Pin|LT_Pin;
+  /*Configure GPIO pin : SPI_NR24_IRQ_Pin */
+  GPIO_InitStruct.Pin = SPI_NR24_IRQ_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SPI_NR24_IRQ_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPI_NR24_CE_Pin CPI_NR24_CSN_Pin LCD_RST_Pin LED3_Pin 
+  /*Configure GPIO pins : LCD_RST_Pin LCD_CE_Pin LED3_Pin SPI_NR24_CSN_Pin 
                            LED4_Pin LED1_Pin */
-  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin|CPI_NR24_CSN_Pin|LCD_RST_Pin|LED3_Pin 
+  GPIO_InitStruct.Pin = LCD_RST_Pin|LCD_CE_Pin|LED3_Pin|SPI_NR24_CSN_Pin 
                           |LED4_Pin|LED1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : TOGGD_Pin TOGGL_Pin */
-  GPIO_InitStruct.Pin = TOGGD_Pin|TOGGL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LCD_CLK_Pin LCD_CE_Pin LCD_DATA_Pin */
-  GPIO_InitStruct.Pin = LCD_CLK_Pin|LCD_CE_Pin|LCD_DATA_Pin;
+  /*Configure GPIO pins : LCD_CLK_Pin LCD_DATA_Pin */
+  GPIO_InitStruct.Pin = LCD_CLK_Pin|LCD_DATA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -633,17 +723,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(LCD_COMM_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : T1_Pin T2_Pin T3_Pin T4_Pin */
-  GPIO_InitStruct.Pin = T1_Pin|T2_Pin|T3_Pin|T4_Pin;
+  /*Configure GPIO pins : TOGG1_Pin TOGG2_Pin TOGG3_Pin TOGG4_Pin */
+  GPIO_InitStruct.Pin = TOGG1_Pin|TOGG2_Pin|TOGG3_Pin|TOGG4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : NRF24_IRQ_Pin */
-  GPIO_InitStruct.Pin = NRF24_IRQ_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pin : SPI_NR24_CE_Pin */
+  GPIO_InitStruct.Pin = SPI_NR24_CE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(NRF24_IRQ_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SPI_NR24_CE_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : TOGG5_Pin TOGG6_Pin */
+  GPIO_InitStruct.Pin = TOGG5_Pin|TOGG6_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

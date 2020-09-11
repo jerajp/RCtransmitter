@@ -58,7 +58,7 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void DMA1_Channel1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
-
+uint32_t ScaleJoysticks(uint32_t min, uint32_t max, uint32_t value);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

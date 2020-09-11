@@ -46,17 +46,32 @@ extern "C" {
 #define BUTTONTHRESHOLD 10
 #define BATTAVERAGETIME 50 //50 msec average
 #define TXPERIOD 20 	  //20ms -50 MSG/sec
-#define LCDLASTMENU 2	  //3menus
+#define LCDLASTMENU 4	  //5menus
 #define MINMSGPERSEC 10   //min 10 msg per second
 
 #define MINREMOTEBATT 3000
 #define MINDRONEBATT  10500
+
+//JOYSTICK END POINTS
+#define LJOYXMINDEF 440
+#define LJOYXMAXDEF 4020
+#define LJOYYMINDEF 15
+#define LJOYYMAXDEF 3780
+
+#define RJOYXMINDEF 70
+#define RJOYXMAXDEF 3790
+#define RJOYYMINDEF 300
+#define RJOYYMAXDEF 4080
+
+#define TRIMJOYSTEP 5
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -68,10 +83,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED2_Pin GPIO_PIN_13
 #define LED2_GPIO_Port GPIOC
-#define DT_Pin GPIO_PIN_14
-#define DT_GPIO_Port GPIOC
-#define LT_Pin GPIO_PIN_15
-#define LT_GPIO_Port GPIOC
 #define AD1_0_LX_Pin GPIO_PIN_0
 #define AD1_0_LX_GPIO_Port GPIOA
 #define AD1_1_LY_Pin GPIO_PIN_1
@@ -86,12 +97,8 @@ void Error_Handler(void);
 #define AD1_8_P2_GPIO_Port GPIOB
 #define AD1_9_BATT_Pin GPIO_PIN_1
 #define AD1_9_BATT_GPIO_Port GPIOB
-#define SPI_NR24_CE_Pin GPIO_PIN_2
-#define SPI_NR24_CE_GPIO_Port GPIOB
-#define CPI_NR24_CSN_Pin GPIO_PIN_10
-#define CPI_NR24_CSN_GPIO_Port GPIOB
-#define TOGGD_Pin GPIO_PIN_11
-#define TOGGD_GPIO_Port GPIOB
+#define SPI_NR24_IRQ_Pin GPIO_PIN_2
+#define SPI_NR24_IRQ_GPIO_Port GPIOB
 #define LCD_RST_Pin GPIO_PIN_12
 #define LCD_RST_GPIO_Port GPIOB
 #define LCD_CLK_Pin GPIO_PIN_13
@@ -102,20 +109,26 @@ void Error_Handler(void);
 #define LCD_DATA_GPIO_Port GPIOB
 #define LCD_COMM_Pin GPIO_PIN_8
 #define LCD_COMM_GPIO_Port GPIOA
-#define T1_Pin GPIO_PIN_9
-#define T1_GPIO_Port GPIOA
-#define T2_Pin GPIO_PIN_10
-#define T2_GPIO_Port GPIOA
-#define T3_Pin GPIO_PIN_11
-#define T3_GPIO_Port GPIOA
-#define T4_Pin GPIO_PIN_12
-#define T4_GPIO_Port GPIOA
-#define NRF24_IRQ_Pin GPIO_PIN_15
-#define NRF24_IRQ_GPIO_Port GPIOA
-#define TOGGL_Pin GPIO_PIN_4
-#define TOGGL_GPIO_Port GPIOB
+#define TOGG1_Pin GPIO_PIN_9
+#define TOGG1_GPIO_Port GPIOA
+#define TOGG2_Pin GPIO_PIN_10
+#define TOGG2_GPIO_Port GPIOA
+#define TOGG3_Pin GPIO_PIN_11
+#define TOGG3_GPIO_Port GPIOA
+#define TOGG4_Pin GPIO_PIN_12
+#define TOGG4_GPIO_Port GPIOA
+#define SPI_NR24_CE_Pin GPIO_PIN_15
+#define SPI_NR24_CE_GPIO_Port GPIOA
+#define TOGG5_Pin GPIO_PIN_3
+#define TOGG5_GPIO_Port GPIOB
+#define TOGG6_Pin GPIO_PIN_4
+#define TOGG6_GPIO_Port GPIOB
 #define LED3_Pin GPIO_PIN_5
 #define LED3_GPIO_Port GPIOB
+#define SPI_NR24_CSN_Pin GPIO_PIN_6
+#define SPI_NR24_CSN_GPIO_Port GPIOB
+#define BUZZER_Pin GPIO_PIN_7
+#define BUZZER_GPIO_Port GPIOB
 #define LED4_Pin GPIO_PIN_8
 #define LED4_GPIO_Port GPIOB
 #define LED1_Pin GPIO_PIN_9
