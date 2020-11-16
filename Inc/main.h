@@ -46,7 +46,6 @@ extern "C" {
 #define BUTTONTHRESHOLD 10
 #define BATTAVERAGETIME 50 //50 msec average
 #define TXPERIOD 20 	  //20ms -50 MSG/sec
-#define LCDLASTMENU 4	  //5menus
 #define MINMSGPERSEC 10   //min 10 msg per second
 
 #define MINREMOTEBATT 3000
@@ -63,7 +62,25 @@ extern "C" {
 #define RJOYYMINDEF 300
 #define RJOYYMAXDEF 4080
 
+//FLASH constants
+#define FLASHCONSTADDR 0x800FC00
+#define CONTROLWORD 7 //control word to check if Flash constants are present
+
 #define TRIMJOYSTEP 5
+
+//Menu data
+typedef enum {LVL0,LVL1}MenuLvL;
+typedef enum {MainScreen, MenuScreen1}LCDScreen;
+typedef enum {Line0,Line1,Line2,Line3,Line4,Line5}CursorPositions;
+
+
+struct FlashDatastruct
+{
+	uint32_t controlData;
+	uint32_t LCD_contrast;
+
+};
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -77,6 +94,11 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+/* USER CODE BEGIN 4 */
+
+void writeFlashData(uint32_t flashstartaddr);
+uint32_t CheckFlashData(uint32_t StartAddr);
+void ReadFlashData(struct FlashDatastruct *p);
 
 /* USER CODE END EFP */
 

@@ -174,7 +174,9 @@ extern uint8_t nRF24_payloadRX[32]; //RX buffer
 extern const uint8_t nRF24_ADDR[3];
 extern uint8_t RXstpaketov;
 extern uint32_t MainInitDoneFlag;
-extern uint32_t LCDMenu;
+extern uint32_t LvLUp,LvlDown;
+extern uint32_t MenuPlus,MenuMinus;
+extern uint32_t CursorUp,CursorDown;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -735,51 +737,48 @@ void SysTick_Handler(void)
   //T1 EVENT
   if(T1StatusDebounceHIST!=T1StatusDebounce && T1StatusDebounce==1)
   {
-
+	 LvLUp=1;
   }
 
   //T2 EVENT
   if(T2StatusDebounceHIST!=T2StatusDebounce && T2StatusDebounce==1)
   {
-
+	 LvlDown=1;
   }
 
   //T3 EVENT
   if(T3StatusDebounceHIST!=T3StatusDebounce && T3StatusDebounce==1)
   {
-
+	  //spare
   }
 
   //T4 EVENT
   if(T4StatusDebounceHIST!=T4StatusDebounce && T4StatusDebounce==1)
   {
-
+	  //spare
   }
 
   //T UP EVENT
   if(TUpStatusDebounceHIST!=TUpStatusDebounce && TUpStatusDebounce==1)
   {
-
+	  CursorUp=1;
   }
 
   //T DOWN EVENT
   if(TDownStatusDebounceHIST!=TDownStatusDebounce && TDownStatusDebounce==1)
   {
-
+	 CursorDown=1;
   }
 
   //T LEFT EVENT
   if(TLeftStatusDebounceHIST!=TLeftStatusDebounce && TLeftStatusDebounce==1)
   {
-	  if(LCDMenu==0)LCDMenu=LCDLASTMENU;
-	  else LCDMenu--;
+	  MenuMinus=1;
   }
-
   //T RIGHT EVENT
   if(TRightStatusDebounceHIST!=TRightStatusDebounce && TRightStatusDebounce==1)
   {
-	  LCDMenu++;
-	  if(LCDMenu>LCDLASTMENU)LCDMenu=0;
+	 MenuPlus=1;
   }
 
 

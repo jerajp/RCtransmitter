@@ -26,6 +26,7 @@
 #include "nokia5110_LCD.h"
 #include "nrf24.h"
 #include "mcp23017.h"
+#include "LCDprints.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,9 +79,6 @@ extern uint32_t TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRight
 
 uint16_t adcDataArray[7];
 
-extern uint32_t Batt1cellAVG;
-extern uint32_t motorSTAT;
-
 extern uint32_t LjoyUPDOWN;
 extern uint32_t LjoyLEFTRIGHT;
 extern uint32_t DjoyUPDOWN;
@@ -93,9 +91,6 @@ extern int32_t DjoyLEFTRIGHTzeroOffset;
 
 extern uint32_t potenc1;
 extern uint32_t potenc2;
-
-uint32_t LCDMenu=0;
-uint32_t LCDMenuHist=0;
 
 //MCP23017
 MCP23017str	MCP23017DataStr;
@@ -110,9 +105,7 @@ extern uint32_t TXdelay;
 extern uint8_t Buttons;
 extern uint32_t DroneBattUpperByte;
 extern uint32_t DroneBattLowerByte;
-extern uint32_t DroneBattmV;
-extern int32_t DronePitchAngle;
-extern int32_t DroneRollAngle;
+
 
 extern uint32_t TotalMSGsend;
 extern uint32_t TotalMSGrecv;
@@ -120,6 +113,24 @@ extern uint32_t MSGprerSecond;
 extern uint32_t MSGLowCount;
 
 uint32_t MainInitDoneFlag=0;
+struct FlashDatastruct FlashDataDefault; //Default constant embedded in Code
+struct FlashDatastruct FlashDataFlash;  //Constants read from Flash
+struct FlashDatastruct FlashDataActive; //Active constants
+
+//LCD MENUS
+MenuLvL CurrentLvl;
+LCDScreen CurrentScreen;
+CursorPositions CurrentCursorPos;
+
+
+//Buttons to move through screens, move cursor and change menu lvl
+uint32_t LvLUpHIST,LvlDownHIST;
+uint32_t MenuPlusHIST,MenuMinusHIST;
+uint32_t CursorUpHIST,CursorDownHIST;
+uint32_t MenuPlus,MenuMinus;
+uint32_t CursorUp,CursorDown;
+uint32_t LvLUp,LvlDown;
+
 
 /* USER CODE END PV */
 
@@ -147,7 +158,6 @@ static void MX_TIM4_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
 	//test timings DWT counter
 	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	DWT->CYCCNT = 0;
@@ -180,8 +190,28 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   HAL_ADCEx_Calibration_Start(&hadc1);
-
   HAL_ADC_Start_DMA(&hadc1,adcDataArray, 7);
+
+  //DEFAULT FLASH CONSTANTS
+  FlashDataDefault.controlData=CONTROLWORD;
+  FlashDataDefault.LCD_contrast=0xB8;
+
+  if( CheckFlashData(FLASHCONSTADDR) == CONTROLWORD ) //Check if any Data is present
+  {
+	  watch1=1;
+	  //Read Data and Save parameters into ACTIVE structure
+	  ReadFlashData(&FlashDataActive);
+
+  }
+  else
+  {
+	  watch1=2;
+  }
+
+
+
+
+
 
   //Lightshow
   LED1ON;
@@ -193,6 +223,11 @@ int main(void)
   LED2OFF;
   LED3OFF;
   LED4OFF;
+
+  //default LCD
+  CurrentLvl=LVL0;
+  CurrentScreen=MainScreen;
+  CurrentCursorPos=Line0;
 
   //lcd init pins
   LCD_setRST(LCD_RST_GPIO_Port, LCD_RST_Pin);
@@ -249,6 +284,10 @@ int main(void)
   //MCP23017 intit
   mcp23017_init(&hi2c2,MCP23017_ADDRESS_20);
 
+
+  //TESTING
+  //writeFlashData(FLASHCONSTADDR);
+
   MainInitDoneFlag=1;
 
 
@@ -258,125 +297,51 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-	  if(LCDMenuHist!=LCDMenu)LCD_clrScr();
-	  LCDMenuHist=LCDMenu;
-
-	  switch(LCDMenu)
+	  //State machine for Menu/Cursor/lvl change
+	  if(MenuPlusHIST!=MenuPlus && MenuPlus==1)
 	  {
-	  	  case 0:{
-	  		  	  	  //Main menu
-	  		  	  	  switch(motorSTAT)
-	  		  	  	  {
-	  		  	  	  	  case 1:{
-	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT OFF     ");
-	  		  	  	  	  	  	  }break;
+		  switch(CurrentLvl)
+		  {
+		  	  case LVL0: {
+		  		  	  	  	  switch(CurrentScreen)
+		  		  	  	  	  {
+		  		  	  	  	  	  case MainScreen:{CurrentScreen=MenuScreen1;}break;
+		  		  	  	  	  	  case MenuScreen1:{CurrentScreen=MainScreen;}break;
+		  		  	  	  	  }break;
 
-	  		  	  	  	  case 2:{
-	  		  	  		  	  	  sprintf(stringlcdBuffer,"MOT STARTING");
-	  		  	  	  	  	  	  }break;
+		  	  	  	  	  }break;
 
-	  		  	  	  	  case 3:{
-	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT RUNNING ");
-	  		  	  	  	  	 	 }break;
+		  	  case LVL1: {
 
-	  		  	  	  	  default:{
-	  		  	  		  	  	  	  sprintf(stringlcdBuffer,"MOT INIT    ");
-	  		  	  	  	  	  	  }
-	  		  	  	  }
-	  		  	  	  LCD_print(stringlcdBuffer,0,0);
-
-	  		  	  	  sprintf(stringlcdBuffer,"RC: %u mV",Batt1cellAVG);
-	  		  	  	  LCD_print(stringlcdBuffer,0,1);
-
-	  		  	  	  sprintf(stringlcdBuffer,"DR: %u mV",DroneBattmV);
-	  		  	  	  LCD_print(stringlcdBuffer,0,2);
-
-	  		  	  	  sprintf(stringlcdBuffer,"Pitch: %d ",DronePitchAngle);
-	  		  	  	  LCD_print(stringlcdBuffer,0,3);
-
-	  		  	  	  sprintf(stringlcdBuffer,"Roll: %d ",DroneRollAngle);
-	  		  	  	  LCD_print(stringlcdBuffer,0,4);
-
-	  	  	  	 }break;
-
-	  	  case 1:{
-	  		  	  	  //Diagnostics Connection
-	  		  	  	  sprintf(stringlcdBuffer,"Total MSG");
-	  	  	  	  	  LCD_print(stringlcdBuffer,0,0);
-
-	  	  	  	  	  sprintf(stringlcdBuffer,"Send %u",TotalMSGsend);
-	  	  	  	  	  LCD_print(stringlcdBuffer,0,1);
-
-	  	  	  	  	  sprintf(stringlcdBuffer,"Recv %u",TotalMSGrecv);
-	  	  	  	  	  LCD_print(stringlcdBuffer,0,2);
-
-	  	  	  	  	  sprintf(stringlcdBuffer,"MSG/s: %u",MSGprerSecond);
-	  	  	  	  	  LCD_print(stringlcdBuffer,0,3);
-
-	  		  	  	  sprintf(stringlcdBuffer,"RClow[s]: %u",MSGLowCount);
-	  		  	  	  LCD_print(stringlcdBuffer,0,4);
-
-	  	  	  	 }break;
-
-	  	case 2:{
-
-			  	  sprintf(stringlcdBuffer,"Toggle:%u%u%u%u%u%u",TOGG1statusdebounce,TOGG2statusdebounce,TOGG3statusdebounce,TOGG4statusdebounce,TOGG5statusdebounce,TOGG6statusdebounce);
-			  	  LCD_print(stringlcdBuffer,0,0);
-
-			  	  sprintf(stringlcdBuffer,"Pot: %u %u    ",potenc1,potenc2);
-			  	  LCD_print(stringlcdBuffer,0,1);
-
-			  	  sprintf(stringlcdBuffer,"%u %u %u %u    ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
-			  	  LCD_print(stringlcdBuffer,0,2);
-
-			  	  sprintf(stringlcdBuffer,"LY %d %d    ",LjoyUPDOWNzeroOffset,LjoyLEFTRIGHTzeroOffset);
-				  LCD_print(stringlcdBuffer,0,3);
-
-			  	  sprintf(stringlcdBuffer,"RY %d %d    ",DjoyUPDOWNzeroOffset,DjoyLEFTRIGHTzeroOffset);
-			  	  LCD_print(stringlcdBuffer,0,4);
-
-
-			  	  //sprintf(stringlcdBuffer,"Jo: %d %d %d %d  ",offsetLjoyUPDOWN,offsetLjoyLEFTRIGHT,offsetDjoyUPDOWN,offsetDjoyLEFTRIGHT);
-			  	  //LCD_print(stringlcdBuffer,0,4);
-
-	  		   }break;
-
-	  	  case 3:{
-	  			  	  //Diagnostics Inputs
-	  		  	  	  sprintf(stringlcdBuffer,"Joystick Butt");
-	  			  	  LCD_print(stringlcdBuffer,0,0);
-
-	  		  	  	  sprintf(stringlcdBuffer,"LX- %d LX+ %d",TJoyLeftXMinusStatusDebounce,TJoyLeftXPlusStatusDebounce);
-	  			  	  LCD_print(stringlcdBuffer,0,1);
-
-	  		  	  	  sprintf(stringlcdBuffer,"LY- %d LY+ %d",TJoyLeftYMinusStatusDebounce,TJoyLeftYPlusStatusDebounce);
-	  			  	  LCD_print(stringlcdBuffer,0,2);
-
-	  		  	  	  sprintf(stringlcdBuffer,"RX- %d RX+ %d",TJoyRightXMinusStatusDebounce,TJoyRightXPlusStatusDebounce);
-	  			  	  LCD_print(stringlcdBuffer,0,3);
-
-	  		  	  	  sprintf(stringlcdBuffer,"RY- %d RY+ %d",TJoyRightYMinusStatusDebounce,TJoyRightYPlusStatusDebounce);
-	  			  	  LCD_print(stringlcdBuffer,0,4);
-
-	  		  	  	  //sprintf(stringlcdBuffer,"%d %d %d %d",watch1,watch2,watch3,watch4);
-	  			  	  //LCD_print(stringlcdBuffer,0,5);
-
-	  	  	  	 }break;
-
-	  	case 4:{
-		  	  	  //Diagnostics Inputs
-	  	  	  	  sprintf(stringlcdBuffer,"LCD Buttons");
-	  	  	  	  LCD_print(stringlcdBuffer,0,0);
-
-		  	  	  sprintf(stringlcdBuffer,"Tb %d %d %d %d",T1StatusDebounce,T2StatusDebounce,T3StatusDebounce,T4StatusDebounce);
-			  	  LCD_print(stringlcdBuffer,0,1);
-
-		  	  	  sprintf(stringlcdBuffer,"Ts %d %d %d %d",TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRightStatusDebounce);
-			  	  LCD_print(stringlcdBuffer,0,2);
-
-	  		   }break;
+		  		  	  	  }break;
+		  }
 	  }
+
+
+	  //display selected screen
+	  switch(CurrentLvl)
+	  {
+	  	  case LVL0: {
+	  		  	  	  	  switch(CurrentScreen)
+	  		  	  	  	  {
+	  		  	  	  	  	  case MainScreen:{MainScreenPrint(stringlcdBuffer);}break;
+	  		  	  	  	  	  case MenuScreen1:{MenuScreen1Print(stringlcdBuffer,CurrentCursorPos);}break;
+	  		  	  	  	  }break;
+
+	  	  	  	  	  }break;
+
+	  	  case LVL1: {
+
+	  		  	  	  }break;
+	  }
+
+	  //save new status For Menu/Cursor/LVL changes
+	  LvLUpHIST=LvLUp;
+	  LvlDownHIST=LvlDown;
+	  MenuPlusHIST=MenuPlus;
+	  MenuMinusHIST=MenuMinus;
+	  CursorUpHIST=CursorUp;
+	  CursorDownHIST=CursorDown;
 
 	  //test1=DWT->CYCCNT;
 	  //test2=DWT->CYCCNT-test1;
@@ -745,6 +710,43 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+//Write Data into Flash starting from given address
+void writeFlashData(uint32_t flashstartaddr)
+{
+	FLASH_EraseInitTypeDef EraseInitStruct;
+
+	uint32_t PageError;
+
+	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+	EraseInitStruct.PageAddress = flashstartaddr;
+	EraseInitStruct.NbPages     = 1;
+
+	HAL_FLASH_Unlock();
+
+	//FLASH_PageErase(0x800FC00); //doesn't handle all registers PER regiser in CR is not cleared
+
+	HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,flashstartaddr, 11);
+
+	HAL_FLASH_Lock();
+
+}
+
+//Check if Data on given address matches control word
+uint32_t CheckFlashData(uint32_t StartAddr)
+{
+	return *(( uint32_t *) (StartAddr) );
+}
+
+//Read Data from Flash
+void ReadFlashData(struct FlashDatastruct *p)
+{
+	p->controlData=CONTROLWORD;
+	p->LCD_contrast=0;
+
+}
 
 /* USER CODE END 4 */
 

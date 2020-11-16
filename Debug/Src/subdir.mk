@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Src/LCDprints.c \
 ../Src/SPI-test.c \
 ../Src/main.c \
 ../Src/mcp23017.c \
@@ -16,6 +17,7 @@ C_SRCS += \
 ../Src/system_stm32f1xx.c 
 
 OBJS += \
+./Src/LCDprints.o \
 ./Src/SPI-test.o \
 ./Src/main.o \
 ./Src/mcp23017.o \
@@ -28,6 +30,7 @@ OBJS += \
 ./Src/system_stm32f1xx.o 
 
 C_DEPS += \
+./Src/LCDprints.d \
 ./Src/SPI-test.d \
 ./Src/main.d \
 ./Src/mcp23017.d \
@@ -41,6 +44,8 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
+Src/LCDprints.o: ../Src/LCDprints.c
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/LCDprints.d" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 Src/SPI-test.o: ../Src/SPI-test.c
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m3 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F103xB -DDEBUG -c -I../Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/SPI-test.d" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 Src/main.o: ../Src/main.c
