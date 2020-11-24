@@ -54,6 +54,7 @@
 #include <stdbool.h>
 #include "font.h"
 #include "stm32f1xx_hal.h"
+#include "main.h" //linking parameter's structure
 
 #define LCD_COMMAND 0
 #define LCD_DATA 1
@@ -107,7 +108,7 @@ void LCD_setCLK(GPIO_TypeDef* PORT, uint16_t PIN);
 /*----- Library Functions -----*/
 void LCD_send(uint8_t val);
 void LCD_write(uint8_t data, uint8_t mode);
-void LCD_init();
+void LCD_init(struct FlashDatastruct *p);
 void LCD_invert(bool mode);
 void LCD_invertText(bool mode);
 void LCD_putChar(char c);

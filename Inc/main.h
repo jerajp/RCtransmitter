@@ -70,15 +70,14 @@ extern "C" {
 
 //Menu data
 typedef enum {LVL0,LVL1}MenuLvL;
-typedef enum {MainScreen, MenuScreen1}LCDScreen;
+typedef enum {MainScreen, MenuScreen1,MSGScreen1,ButtonScreen1,ButtonScreen2,ButtonScreen3,TestScreen1,FlashDataScreenRd,FlashDataScreenWr, CommandScreen1 }LCDScreen;
 typedef enum {Line0,Line1,Line2,Line3,Line4,Line5}CursorPositions;
 
 
 struct FlashDatastruct
 {
 	uint32_t controlData;
-	uint32_t LCD_contrast;
-
+	uint8_t LCD_contrast;
 };
 
 /* USER CODE END EC */
@@ -96,9 +95,10 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 /* USER CODE BEGIN 4 */
 
-void writeFlashData(uint32_t flashstartaddr);
+void WriteFlashData(uint32_t flashstartaddr, struct FlashDatastruct *p);
+void ReadFlashData(uint32_t flashstartaddr, struct FlashDatastruct *p);
+void EraseFlashData(uint32_t StartAddr);
 uint32_t CheckFlashData(uint32_t StartAddr);
-void ReadFlashData(struct FlashDatastruct *p);
 
 /* USER CODE END EFP */
 

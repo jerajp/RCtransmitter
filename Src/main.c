@@ -70,27 +70,7 @@ uint32_t watch6;
 
 
 char stringlcdBuffer[20];
-
-extern uint32_t TOGG1statusdebounce,TOGG2statusdebounce,TOGG3statusdebounce,TOGG4statusdebounce,TOGG5statusdebounce,TOGG6statusdebounce;
-extern uint32_t TJoyLeftXPlusStatusDebounce,TJoyLeftXMinusStatusDebounce,TJoyLeftYPlusStatusDebounce,TJoyLeftYMinusStatusDebounce;
-extern uint32_t TJoyRightXPlusStatusDebounce,TJoyRightXMinusStatusDebounce,TJoyRightYPlusStatusDebounce,TJoyRightYMinusStatusDebounce;
-extern uint32_t T1StatusDebounce,T2StatusDebounce,T3StatusDebounce,T4StatusDebounce;
-extern uint32_t TUpStatusDebounce,TDownStatusDebounce,TLeftStatusDebounce,TRightStatusDebounce;
-
 uint16_t adcDataArray[7];
-
-extern uint32_t LjoyUPDOWN;
-extern uint32_t LjoyLEFTRIGHT;
-extern uint32_t DjoyUPDOWN;
-extern uint32_t DjoyLEFTRIGHT;
-
-extern int32_t LjoyUPDOWNzeroOffset;
-extern int32_t LjoyLEFTRIGHTzeroOffset;
-extern int32_t DjoyUPDOWNzeroOffset;
-extern int32_t DjoyLEFTRIGHTzeroOffset;
-
-extern uint32_t potenc1;
-extern uint32_t potenc2;
 
 //MCP23017
 MCP23017str	MCP23017DataStr;
@@ -100,17 +80,6 @@ uint8_t nRF24_payloadTX[32]; //TX buffer
 uint8_t nRF24_payloadRX[32]; //RX buffer
 const uint8_t nRF24_ADDR[3] = {5, 3, 5 }; //Address
 uint8_t RXstpaketov=0;
-
-extern uint32_t TXdelay;
-extern uint8_t Buttons;
-extern uint32_t DroneBattUpperByte;
-extern uint32_t DroneBattLowerByte;
-
-
-extern uint32_t TotalMSGsend;
-extern uint32_t TotalMSGrecv;
-extern uint32_t MSGprerSecond;
-extern uint32_t MSGLowCount;
 
 uint32_t MainInitDoneFlag=0;
 struct FlashDatastruct FlashDataDefault; //Default constant embedded in Code
@@ -122,14 +91,13 @@ MenuLvL CurrentLvl;
 LCDScreen CurrentScreen;
 CursorPositions CurrentCursorPos;
 
-
 //Buttons to move through screens, move cursor and change menu lvl
-uint32_t LvLUpHIST,LvlDownHIST;
-uint32_t MenuPlusHIST,MenuMinusHIST;
-uint32_t CursorUpHIST,CursorDownHIST;
 uint32_t MenuPlus,MenuMinus;
 uint32_t CursorUp,CursorDown;
+uint32_t ValuePlus,ValueMinus;
 uint32_t LvLUp,LvlDown;
+
+extern uint32_t CommShtdownnrf24;
 
 
 /* USER CODE END PV */
@@ -196,22 +164,19 @@ int main(void)
   FlashDataDefault.controlData=CONTROLWORD;
   FlashDataDefault.LCD_contrast=0xB8;
 
+
   if( CheckFlashData(FLASHCONSTADDR) == CONTROLWORD ) //Check if any Data is present
   {
-	  watch1=1;
 	  //Read Data and Save parameters into ACTIVE structure
-	  ReadFlashData(&FlashDataActive);
+	  ReadFlashData(FLASHCONSTADDR, &FlashDataActive);
 
   }
   else
   {
-	  watch1=2;
+	  //Write default values into Flash, Read back data into Active Structure
+	  WriteFlashData(FLASHCONSTADDR, &FlashDataDefault);
+	  ReadFlashData(FLASHCONSTADDR, &FlashDataActive);
   }
-
-
-
-
-
 
   //Lightshow
   LED1ON;
@@ -236,7 +201,7 @@ int main(void)
   LCD_setDIN(LCD_DATA_GPIO_Port, LCD_DATA_Pin);
   LCD_setCLK(LCD_CLK_GPIO_Port, LCD_CLK_Pin);
 
-  LCD_init(); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
+  LCD_init(&FlashDataActive); //6 lines 15 characters max per line (0,0), (0,1), (0,2), (0,3), (0,4), (0,5) line starts
 
 
   //NRF24INIT
@@ -297,51 +262,187 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //State machine for Menu/Cursor/lvl change
-	  if(MenuPlusHIST!=MenuPlus && MenuPlus==1)
+
+	  if(MenuPlus)//Menu PLUS------------------------------------------------------------------------------------------------------------------------
 	  {
-		  switch(CurrentLvl)
+	  	  LCD_clrScr();
+
+	  	  switch(CurrentScreen)
+	  	  {
+	  	  	  case MainScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case MenuScreen1:{CurrentScreen=TestScreen1;}break;
+	  	  	  case TestScreen1:{CurrentScreen=MainScreen;}break;
+
+	  	  	  case ButtonScreen1:{CurrentScreen=ButtonScreen2;}break;
+	  	  	  case ButtonScreen2:{CurrentScreen=ButtonScreen3;}break;
+	  	  	  case ButtonScreen3:{CurrentScreen=ButtonScreen1;}break;
+	  	  }
+
+		  MenuPlus=0;
+		  CurrentCursorPos = Line0;//reset cursor
+	  }
+
+	  if(MenuMinus)//MENU MINUS----------------------------------------------------------------------------------------------------------------------
+	  {
+	  	  LCD_clrScr();
+
+	  	  switch(CurrentScreen)
+	  	  {
+	  	  	  case MainScreen:{CurrentScreen=TestScreen1;}break;
+	  	  	  case MenuScreen1:{CurrentScreen=MainScreen;}break;
+	  	  	  case TestScreen1:{CurrentScreen=MenuScreen1;}break;
+
+	  	  	  case ButtonScreen1:{CurrentScreen=ButtonScreen3;}break;
+	  	  	  case ButtonScreen2:{CurrentScreen=ButtonScreen1;}break;
+	  	  	  case ButtonScreen3:{CurrentScreen=ButtonScreen2;}break;
+	  	  }
+
+		  MenuMinus=0;
+		  CurrentCursorPos = Line0;//reset cursor
+	  }
+
+	  if(LvLUp)//LVL UP------------------------------------------------------------------------------------------------------------------------------
+	  {
+		  LCD_clrScr();
+
+          switch(CurrentScreen)
+          {
+              case MenuScreen1:
+              {
+            	  switch(CurrentCursorPos)
+            	  {
+                  	  case Line0:{CurrentScreen=MSGScreen1;}break;
+                  	  case Line1:{CurrentScreen=ButtonScreen1;}break;
+
+                  	  case Line2:{
+                  		  	  	  	  CurrentScreen=FlashDataScreenRd;
+                  		  	  	  	  ReadFlashData(FLASHCONSTADDR, &FlashDataFlash);
+                  	  	  	  	  }break;
+
+                  	  case Line3:{
+                  		  	  	  	  CurrentScreen=FlashDataScreenWr;
+
+                  	  	  	  	 }break;
+
+                  	  case Line4:{CurrentScreen=CommandScreen1;}break;
+            	  }
+              }break;
+
+              case CommandScreen1:
+              {
+            	  switch(CurrentCursorPos)
+            	  {
+                  	  case Line0:{CommShtdownnrf24=!CommShtdownnrf24;}break;
+                  	  case Line1:{WriteFlashData(FLASHCONSTADDR, &FlashDataActive);}break;
+                  	  case Line2:{EraseFlashData(FLASHCONSTADDR);}break;
+            	  }
+              }break;
+
+          }
+		  LvLUp=0;
+		  CurrentCursorPos = Line0;//reset cursor
+	  }
+
+	  if(LvlDown)//LVL DOWN---------------------------------------------------------------------------------------------------------------------------
+	  {
+		  LCD_clrScr();
+
+		  switch(CurrentScreen)
 		  {
-		  	  case LVL0: {
-		  		  	  	  	  switch(CurrentScreen)
-		  		  	  	  	  {
-		  		  	  	  	  	  case MainScreen:{CurrentScreen=MenuScreen1;}break;
-		  		  	  	  	  	  case MenuScreen1:{CurrentScreen=MainScreen;}break;
-		  		  	  	  	  }break;
+		      case MenuScreen1:{CurrentScreen=MainScreen;}break;
+		      case TestScreen1:{CurrentScreen=MainScreen;}break;
 
-		  	  	  	  	  }break;
-
-		  	  case LVL1: {
-
-		  		  	  	  }break;
+		      case MSGScreen1:{CurrentScreen=MenuScreen1;}break;
+		      case ButtonScreen1:{CurrentScreen=MenuScreen1;}break;
+		      case ButtonScreen2:{CurrentScreen=MenuScreen1;}break;
+		      case ButtonScreen3:{CurrentScreen=MenuScreen1;}break;
+		      case FlashDataScreenRd:{CurrentScreen=MenuScreen1;}break;
+		      case FlashDataScreenWr:{CurrentScreen=MenuScreen1;}break;
+		      case CommandScreen1:{CurrentScreen=MenuScreen1;}break;
 		  }
+		  LvlDown=0;
+		  CurrentCursorPos = Line0;//reset cursor
 	  }
 
-
-	  //display selected screen
-	  switch(CurrentLvl)
+	  if(CursorUp)//Cursor Up-------------------------------------------------------------------------------------------------------------------------
 	  {
-	  	  case LVL0: {
-	  		  	  	  	  switch(CurrentScreen)
-	  		  	  	  	  {
-	  		  	  	  	  	  case MainScreen:{MainScreenPrint(stringlcdBuffer);}break;
-	  		  	  	  	  	  case MenuScreen1:{MenuScreen1Print(stringlcdBuffer,CurrentCursorPos);}break;
-	  		  	  	  	  }break;
+		  LCD_clrScr();
+		  if(CurrentCursorPos == Line0)CurrentCursorPos=Line5;
+		  else CurrentCursorPos--;
 
-	  	  	  	  	  }break;
-
-	  	  case LVL1: {
-
-	  		  	  	  }break;
+		  CursorUp=0;
 	  }
 
-	  //save new status For Menu/Cursor/LVL changes
-	  LvLUpHIST=LvLUp;
-	  LvlDownHIST=LvlDown;
-	  MenuPlusHIST=MenuPlus;
-	  MenuMinusHIST=MenuMinus;
-	  CursorUpHIST=CursorUp;
-	  CursorDownHIST=CursorDown;
+	  if(CursorDown)//Cursor Down---------------------------------------------------------------------------------------------------------------------
+	  {
+		  LCD_clrScr();
+		  if(CurrentCursorPos == Line5)CurrentCursorPos=Line0;
+		  else CurrentCursorPos++;
+
+		  CursorDown=0;
+	  }
+
+	  if(ValuePlus)//Value Plus---------------------------------------------------------------------------------------------------------------------
+	  {
+		  LCD_clrScr();
+
+		  switch(CurrentScreen)
+		  {
+		  	  case FlashDataScreenWr:
+		  	  {
+		  		switch(CurrentCursorPos)
+		  		{
+		  			case Line0:{FlashDataActive.controlData++;};break;
+		  			case Line1:{FlashDataActive.LCD_contrast+=1;};break;
+		  			case Line2:{};break;
+		  			case Line3:{};break;
+		  			case Line4:{};break;
+		  			case Line5:{};break;
+		  		}
+		  	  }break;
+		  }
+
+		  ValuePlus=0;
+	  }
+
+	  if(ValueMinus)//Value Minus---------------------------------------------------------------------------------------------------------------------
+	  {
+		  LCD_clrScr();
+
+		  switch(CurrentScreen)
+		  {
+		  	  case FlashDataScreenWr:
+		  	  {
+		  		switch(CurrentCursorPos)
+		  		{
+		  			case Line0:{FlashDataActive.controlData--;};break;
+		  			case Line1:{FlashDataActive.LCD_contrast-=1;};break;
+		  			case Line2:{};break;
+		  			case Line3:{};break;
+		  			case Line4:{};break;
+		  			case Line5:{};break;
+		  		}
+		  	  }break;
+		  }
+
+		  ValueMinus=0;
+	  }
+
+
+
+	  switch(CurrentScreen)//Display selected screen----------------------------------------------------------------------------------------------------
+	  {
+	  		case MainScreen:{MainScreenPrint(stringlcdBuffer);}break;
+	  		case MenuScreen1:{MenuScreen1Print(stringlcdBuffer,CurrentCursorPos);}break;
+	  		case MSGScreen1:{MSGScreen1Print(stringlcdBuffer);}break;
+	  		case ButtonScreen1:{ButtonScreen1Print(stringlcdBuffer);}break;
+	  		case ButtonScreen2:{ButtonScreen2Print(stringlcdBuffer);}break;
+	  		case ButtonScreen3:{ButtonScreen3Print(stringlcdBuffer);}break;
+	  		case TestScreen1:{TestScreen1Print(stringlcdBuffer);}break;
+	  		case FlashDataScreenRd:{FlashDataScreenRdPrint(stringlcdBuffer);}break;
+	  		case FlashDataScreenWr:{FlashDataScreenWrPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  		case CommandScreen1:{CommandScreen1Print(stringlcdBuffer,CurrentCursorPos);}break;
+	  }
 
 	  //test1=DWT->CYCCNT;
 	  //test2=DWT->CYCCNT-test1;
@@ -712,14 +813,14 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 //Write Data into Flash starting from given address
-void writeFlashData(uint32_t flashstartaddr)
+void WriteFlashData(uint32_t StartAddr, struct FlashDatastruct *p)
 {
 	FLASH_EraseInitTypeDef EraseInitStruct;
 
 	uint32_t PageError;
 
 	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
-	EraseInitStruct.PageAddress = flashstartaddr;
+	EraseInitStruct.PageAddress = StartAddr;
 	EraseInitStruct.NbPages     = 1;
 
 	HAL_FLASH_Unlock();
@@ -728,11 +829,31 @@ void writeFlashData(uint32_t flashstartaddr)
 
 	HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
 
-	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,flashstartaddr, 11);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr, p->controlData);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+4, p->LCD_contrast);
 
 	HAL_FLASH_Lock();
-
 }
+
+void EraseFlashData(uint32_t StartAddr)
+{
+	FLASH_EraseInitTypeDef EraseInitStruct;
+
+	uint32_t PageError;
+
+	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+	EraseInitStruct.PageAddress = StartAddr;
+	EraseInitStruct.NbPages     = 1;
+
+	HAL_FLASH_Unlock();
+
+	//FLASH_PageErase(0x800FC00); //doesn't handle all registers PER regiser in CR is not cleared
+
+	HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+
+	HAL_FLASH_Lock();
+}
+
 
 //Check if Data on given address matches control word
 uint32_t CheckFlashData(uint32_t StartAddr)
@@ -741,11 +862,10 @@ uint32_t CheckFlashData(uint32_t StartAddr)
 }
 
 //Read Data from Flash
-void ReadFlashData(struct FlashDatastruct *p)
+void ReadFlashData(uint32_t StartAddr, struct FlashDatastruct *p)
 {
-	p->controlData=CONTROLWORD;
-	p->LCD_contrast=0;
-
+	p->controlData= *(( uint32_t *) (StartAddr) );
+	p->LCD_contrast=*(( uint32_t *) (StartAddr+4) );
 }
 
 /* USER CODE END 4 */

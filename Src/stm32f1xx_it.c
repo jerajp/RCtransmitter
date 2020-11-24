@@ -137,6 +137,8 @@ uint32_t MSGLowCount;
 uint32_t ConnectWeakFlag=1;
 uint32_t  LoopCounter=0;
 
+//RC remote commands
+uint32_t CommShtdownnrf24;
 uint32_t i;
 
 
@@ -176,6 +178,7 @@ extern uint8_t RXstpaketov;
 extern uint32_t MainInitDoneFlag;
 extern uint32_t LvLUp,LvlDown;
 extern uint32_t MenuPlus,MenuMinus;
+extern uint32_t ValuePlus,ValueMinus;
 extern uint32_t CursorUp,CursorDown;
 /* USER CODE END EV */
 
@@ -749,13 +752,13 @@ void SysTick_Handler(void)
   //T3 EVENT
   if(T3StatusDebounceHIST!=T3StatusDebounce && T3StatusDebounce==1)
   {
-	  //spare
+	  ValuePlus=1;
   }
 
   //T4 EVENT
   if(T4StatusDebounceHIST!=T4StatusDebounce && T4StatusDebounce==1)
   {
-	  //spare
+	  ValueMinus=1;
   }
 
   //T UP EVENT
@@ -888,7 +891,7 @@ void SysTick_Handler(void)
  }
 
  //NRF24---------------------------------------------------------------------------------------
- if(MainInitDoneFlag)
+ if(MainInitDoneFlag && CommShtdownnrf24!=1)
  {
 
 	 switch(TXdelay)
@@ -964,26 +967,26 @@ void SysTick_Handler(void)
 		 }
 	 }
 
-	 //MSG PER SECOND DIAGNOSTICS
-	 LoopCounter++;
-	 if(LoopCounter==1000)
-	 {
-		 MSGprerSecond=MSGcount;
-
-		 if(MSGcount<MINMSGPERSEC)
-		 {
-			 MSGLowCount++;
-			 ConnectWeakFlag=1;
-		 }
-		 else  ConnectWeakFlag=0;
-
-		 MSGcount=0;
-		 LoopCounter=0;
-	 }
 	 TXdelay++;
 	 if(TXdelay==TXPERIOD)TXdelay=0;
  }//----------------------------------------------------------------------------------------------
 
+ //MSG PER SECOND DIAGNOSTICS
+ LoopCounter++;
+ if(LoopCounter==1000)
+ {
+	 MSGprerSecond=MSGcount;
+
+	 if(MSGcount<MINMSGPERSEC)
+	 {
+		 MSGLowCount++;
+		 ConnectWeakFlag=1;
+	 }
+	 else  ConnectWeakFlag=0;
+
+	 MSGcount=0;
+	 LoopCounter=0;
+ }
 
   /* USER CODE END SysTick_IRQn 1 */
 }

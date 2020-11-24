@@ -73,11 +73,11 @@ void LCD_write(uint8_t data, uint8_t mode){
 /*
  * @brief Initialize the LCD using predetermined values
  */
-void LCD_init(){
+void LCD_init(struct FlashDatastruct *p){
   HAL_GPIO_WritePin(lcd_gpio.RSTPORT, lcd_gpio.RSTPIN, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(lcd_gpio.RSTPORT, lcd_gpio.RSTPIN, GPIO_PIN_SET);
   LCD_write(0x21, LCD_COMMAND); //LCD extended commands.
-  LCD_write(0xB8, LCD_COMMAND); //set LCD Vop(Contrast) //B8 A5
+  LCD_write(p->LCD_contrast, LCD_COMMAND); //set LCD Vop(Contrast) //B8 A5
   LCD_write(0x04, LCD_COMMAND); //set temp coefficent.
   LCD_write(0x14, LCD_COMMAND); //LCD bias mode 1:40.
   LCD_write(0x20, LCD_COMMAND); //LCD basic commands.
