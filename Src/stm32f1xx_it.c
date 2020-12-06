@@ -131,6 +131,8 @@ uint32_t MSGprerSecond;
 uint32_t MSGLowCount;
 uint32_t ConnectWeakFlag=1;
 uint32_t  LoopCounter=0;
+uint32_t MSGSelectorTX;
+uint32_t MSGSelectorRX;
 
 //RC remote commands
 uint32_t CommShtdownnrf24;
@@ -906,16 +908,17 @@ void SysTick_Handler(void)
 					TotalMSGsend++;
 
 					//SEND DATA TO DRONE
-					nRF24_payloadTX[0] = (uint8_t)(LjoyUPDOWN);
-					nRF24_payloadTX[1] = (uint8_t)(LjoyLEFTRIGHT);
-					nRF24_payloadTX[2] = (uint8_t)(DjoyUPDOWN);
-					nRF24_payloadTX[3] = (uint8_t)(DjoyLEFTRIGHT);
-					nRF24_payloadTX[4] = (uint8_t)(potenc1);
-					nRF24_payloadTX[5] = (uint8_t)(potenc2);
-					nRF24_payloadTX[6] = (uint8_t)(Buttons);
+					nRF24_payloadTX[0] = MSGSelectorTX;
+					nRF24_payloadTX[1] = (uint8_t)(LjoyUPDOWN);
+					nRF24_payloadTX[2] = (uint8_t)(LjoyLEFTRIGHT);
+					nRF24_payloadTX[3] = (uint8_t)(DjoyUPDOWN);
+					nRF24_payloadTX[4] = (uint8_t)(DjoyLEFTRIGHT);
+					nRF24_payloadTX[5] = (uint8_t)(potenc1);
+					nRF24_payloadTX[6] = (uint8_t)(potenc2);
+					nRF24_payloadTX[7] = (uint8_t)(Buttons);
 
 					// Transmit a packet
-					nRF24_TransmitPacket(nRF24_payloadTX, 7);
+					nRF24_TransmitPacket(nRF24_payloadTX, 8);
 				 }break;
 
 		 case 6:
@@ -944,20 +947,28 @@ void SysTick_Handler(void)
 			//Clear all pending IRQ flags
 			nRF24_ClearIRQFlags();
 
-			DroneBattLowerByte=nRF24_payloadRX[0];
-			DroneBattUpperByte=nRF24_payloadRX[1];
-			DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+			MSGSelectorRX=nRF24_payloadRX[0];
 
-			DronePitchAngle=nRF24_payloadRX[2];
-			DroneRollAngle=nRF24_payloadRX[3];
+			switch(MSGSelectorRX)
+			{
+				case DRONEDATARETURN:
+				{
+					DroneBattLowerByte=nRF24_payloadRX[1];
+					DroneBattUpperByte=nRF24_payloadRX[2];
+					DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
 
-			if(nRF24_payloadRX[4] & 0x1)DronePitchAngle*=(-1);
-			else if((nRF24_payloadRX[4]>>1)& 0x1)DroneRollAngle*=(-1);
+					if(nRF24_payloadRX[5] & 0x1)DronePitchAngle=(-1)*nRF24_payloadRX[3];
+					else DronePitchAngle=nRF24_payloadRX[3];
 
-			GyroCalibInProgress=(nRF24_payloadRX[4]>>2) & 0x1;
+					if((nRF24_payloadRX[5]>>1)& 0x1)DroneRollAngle=(-1)*nRF24_payloadRX[4];
+					else DroneRollAngle=nRF24_payloadRX[4];
 
-			motorSTAT=(nRF24_payloadRX[4]>>3) & 0x7; //last 3 bits
+					GyroCalibInProgress=(nRF24_payloadRX[5]>>2) & 0x1;
 
+					motorSTAT=(nRF24_payloadRX[5]>>3) & 0x7; //last 3 bits
+				}break;
+
+			}
 			TotalMSGrecv++;
 			MSGcount++;
 		 }

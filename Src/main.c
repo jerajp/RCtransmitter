@@ -233,7 +233,7 @@ int main(void)
   nRF24_SetAddrWidth(3);
 
   nRF24_SetAddr(nRF24_PIPE1, nRF24_ADDR); // program address for RX pipe #1
-  nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 5); // Auto-ACK: disabled, payload length: 5 bytes
+  nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, 6); // Auto-ACK: disabled, payload length: 6 bytes
 
   nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
 

@@ -68,6 +68,12 @@ extern "C" {
 
 #define TRIMJOYSTEP 5
 
+//WIfi message type selector
+#define DRONEDATARETURN	0
+#define COMMERASEFLASH  1
+#define COMWRITEFLASH	2
+#define COMINPUTPARAM1	3
+
 //Menu data
 typedef enum {LVL0,LVL1}MenuLvL;
 typedef enum {MainScreen, MenuScreen1,MSGScreen1,ButtonScreen1,ButtonScreen2,ButtonScreen3,TestScreen1,FlashDataScreenRd,FlashDataScreenWr, CommandScreen1 }LCDScreen;
