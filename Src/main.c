@@ -163,7 +163,10 @@ int main(void)
   //DEFAULT FLASH CONSTANTS
   FlashDataDefault.controlData=CONTROLWORD;
   FlashDataDefault.LCD_contrast=0xB8;
-
+  FlashDataDefault.LjoyXtrim=0;
+  FlashDataDefault.LjoyYtrim=0;
+  FlashDataDefault.RjoyXtrim=0;
+  FlashDataDefault.RjoyYtrim=0;
 
   if( CheckFlashData(FLASHCONSTADDR) == CONTROLWORD ) //Check if any Data is present
   {
@@ -831,6 +834,10 @@ void WriteFlashData(uint32_t StartAddr, struct FlashDatastruct *p)
 
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr, p->controlData);
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+4, p->LCD_contrast);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+8, p->LjoyXtrim);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+12, p->LjoyYtrim);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+16, p->RjoyXtrim);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,StartAddr+20, p->RjoyYtrim);
 
 	HAL_FLASH_Lock();
 }
@@ -866,6 +873,10 @@ void ReadFlashData(uint32_t StartAddr, struct FlashDatastruct *p)
 {
 	p->controlData= *(( uint32_t *) (StartAddr) );
 	p->LCD_contrast=*(( uint32_t *) (StartAddr+4) );
+	p->LjoyXtrim=*(( uint32_t *) (StartAddr+8) );
+	p->LjoyYtrim=*(( uint32_t *) (StartAddr+12) );
+	p->RjoyXtrim=*(( uint32_t *) (StartAddr+16) );
+	p->RjoyYtrim=*(( uint32_t *) (StartAddr+20) );
 }
 
 /* USER CODE END 4 */

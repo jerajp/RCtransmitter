@@ -105,11 +105,6 @@ uint32_t RjoyXmax=RJOYXMAXDEF;
 uint32_t RjoyYmin=RJOYYMINDEF;
 uint32_t RjoyYmax=RJOYYMAXDEF;
 
-int32_t LjoyXtrim;
-int32_t LjoyYtrim;
-int32_t RjoyXtrim;
-int32_t RjoyYtrim;
-
 uint32_t potenc1=0;
 uint32_t potenc2=0;
 
@@ -180,6 +175,7 @@ extern uint32_t LvLUp,LvlDown;
 extern uint32_t MenuPlus,MenuMinus;
 extern uint32_t ValuePlus,ValueMinus;
 extern uint32_t CursorUp,CursorDown;
+extern struct FlashDatastruct FlashDataActive;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -692,48 +688,48 @@ void SysTick_Handler(void)
   //LEFT JOYSTICK X AXIS MINUS EVENT
   if(TJoyLeftXMinusStatusDebounceHIST!=TJoyLeftXMinusStatusDebounce && TJoyLeftXMinusStatusDebounce==1)
   {
-	  LjoyXtrim-=TRIMJOYSTEP;
+	  FlashDataActive.LjoyXtrim-=TRIMJOYSTEP;
   }
 
   //LEFT JOYSTICK X AXIS PLUS EVENT
   if(TJoyLeftXPlusStatusDebounceHIST!=TJoyLeftXPlusStatusDebounce && TJoyLeftXPlusStatusDebounce==1)
   {
-	  LjoyXtrim+=TRIMJOYSTEP;
+	  FlashDataActive.LjoyXtrim+=TRIMJOYSTEP;
   }
 
   //LEFT JOYSTICK Y AXIS MINUS EVENT
   if(TJoyLeftYMinusStatusDebounceHIST!=TJoyLeftYMinusStatusDebounce && TJoyLeftYMinusStatusDebounce==1)
   {
-	  LjoyYtrim-=TRIMJOYSTEP;
+	  FlashDataActive.LjoyYtrim-=TRIMJOYSTEP;
   }
 
   //LEFT JOYSTICK Y AXIS PLUS EVENT
   if(TJoyLeftYPlusStatusDebounceHIST!=TJoyLeftYPlusStatusDebounce && TJoyLeftYPlusStatusDebounce==1)
   {
-	  LjoyYtrim+=TRIMJOYSTEP;
+	  FlashDataActive.LjoyYtrim+=TRIMJOYSTEP;
   }
   //RIGHT JOYSTICK X AXIS MINUS EVENT
   if(TJoyRightXMinusStatusDebounceHIST!=TJoyRightXMinusStatusDebounce && TJoyRightXMinusStatusDebounce==1)
   {
-	  RjoyXtrim-=TRIMJOYSTEP;
+	  FlashDataActive.RjoyXtrim-=TRIMJOYSTEP;
   }
 
   //RIGHT JOYSTICK X AXIS PLUS EVENT
   if(TJoyRightXPlusStatusDebounceHIST!=TJoyRightXPlusStatusDebounce && TJoyRightXPlusStatusDebounce==1)
   {
-	  RjoyXtrim+=TRIMJOYSTEP;
+	  FlashDataActive.RjoyXtrim+=TRIMJOYSTEP;
   }
 
   //RIGHT JOYSTICK Y AXIS MINUS EVENT
   if(TJoyRightYMinusStatusDebounceHIST!=TJoyRightYMinusStatusDebounce && TJoyRightYMinusStatusDebounce==1)
   {
-	  RjoyYtrim-=TRIMJOYSTEP;
+	  FlashDataActive.RjoyYtrim-=TRIMJOYSTEP;
   }
 
   //RIGHT JOYSTICK Y AXIS PLUS EVENT
   if(TJoyRightYPlusStatusDebounceHIST!=TJoyRightYPlusStatusDebounce && TJoyRightYPlusStatusDebounce==1)
   {
-	  RjoyYtrim+=TRIMJOYSTEP;
+	  FlashDataActive.RjoyYtrim+=TRIMJOYSTEP;
   }
 
 
@@ -788,8 +784,9 @@ void SysTick_Handler(void)
   //LEDS-----------------------------------------------------------------------------------------
   if(MainInitDoneFlag)
   {
-	  //LED1
-	  LED1OFF;
+	  //LED1 CALIB INDIC
+	  if(GyroCalibInProgress)LED1ON;
+	  else LED1OFF;
 
 	  //LED2 RC connection OK
 	  if(ConnectWeakFlag)LED2OFF;
@@ -799,9 +796,8 @@ void SysTick_Handler(void)
 	  if( (Batt1cellAVG < MINREMOTEBATT) ||  (DroneBattmV < MINDRONEBATT) ) LED3ON;
 	  else LED3OFF;
 
-	  //LED4 GYRO CALIB INDIC
-	  if(GyroCalibInProgress)LED4ON;
-	  else LED4OFF;
+	  //LED4 OFF
+	  LED4OFF;
   }
 
 
@@ -833,10 +829,10 @@ void SysTick_Handler(void)
  DjoyUPDOWNzeroOffset=adcDataArray[3];
  DjoyLEFTRIGHTzeroOffset=4095-adcDataArray[2];
 
- LjoyUPDOWNzeroOffset+=LjoyYtrim;
- LjoyLEFTRIGHTzeroOffset+=LjoyXtrim;
- DjoyUPDOWNzeroOffset+=RjoyYtrim;
- DjoyLEFTRIGHTzeroOffset+=RjoyXtrim;
+ LjoyUPDOWNzeroOffset+=FlashDataActive.LjoyYtrim;
+ LjoyLEFTRIGHTzeroOffset+=FlashDataActive.LjoyXtrim;
+ DjoyUPDOWNzeroOffset+=FlashDataActive.RjoyYtrim;
+ DjoyLEFTRIGHTzeroOffset+=FlashDataActive.RjoyXtrim;
 
  //zasicenja
  if(LjoyUPDOWNzeroOffset > (int32_t)(4095) )LjoyUPDOWNzeroOffset=4095;

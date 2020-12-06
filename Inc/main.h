@@ -78,6 +78,10 @@ struct FlashDatastruct
 {
 	uint32_t controlData;
 	uint8_t LCD_contrast;
+	int32_t LjoyXtrim;
+	int32_t LjoyYtrim;
+	int32_t RjoyXtrim;
+	int32_t RjoyYtrim;
 };
 
 /* USER CODE END EC */

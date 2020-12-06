@@ -28,6 +28,8 @@ extern struct FlashDatastruct FlashDataDefault;
 extern struct FlashDatastruct FlashDataFlash;
 extern struct FlashDatastruct FlashDataActive;
 
+
+
 extern uint32_t CommShtdownnrf24;
 
 extern uint32_t watch1,watch2,watch3,watch4,watch5,watch6;
@@ -123,7 +125,7 @@ void ButtonScreen1Print(char *buffer)
 	  sprintf(buffer,"Pot: %u %u    ",potenc1,potenc2);
 	  LCD_print(buffer,0,1);
 
-	  sprintf(buffer,"%u %u %u %u    ",LjoyUPDOWN,LjoyLEFTRIGHT,DjoyUPDOWN,DjoyLEFTRIGHT);
+	  sprintf(buffer,"%u %u %u %u    ",LjoyLEFTRIGHT,LjoyUPDOWN,DjoyLEFTRIGHT,DjoyUPDOWN);
 	  LCD_print(buffer,0,2);
 
 	  sprintf(buffer,"LY %d %d    ",LjoyUPDOWNzeroOffset,LjoyLEFTRIGHTzeroOffset);
@@ -189,6 +191,12 @@ void FlashDataScreenRdPrint(char *buffer)
 
   	  sprintf(buffer,"LCDcontr: %u",FlashDataFlash.LCD_contrast);
 	  LCD_print(buffer,0,1);
+
+	  sprintf(buffer,"Lxy:%d:%d   ",FlashDataFlash.LjoyXtrim, FlashDataFlash.LjoyYtrim );
+	  LCD_print(buffer,0,2);
+
+	  sprintf(buffer,"Rxy:%d:%d   ",FlashDataFlash.RjoyXtrim, FlashDataFlash.RjoyYtrim );
+	  LCD_print(buffer,0,3);
 }
 
 void FlashDataScreenWrPrint(char *buffer, CursorPositions pos)
@@ -201,12 +209,12 @@ void FlashDataScreenWrPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," LCDcontr: %u",FlashDataActive.LCD_contrast);
 	LCD_print(buffer,0,1);
 
-	if(pos==Line2)  sprintf(buffer,"*");
-	else sprintf(buffer," ");
+	if(pos==Line2)  sprintf(buffer,"*Lxy:%d:%d   ",FlashDataActive.LjoyXtrim, FlashDataActive.LjoyYtrim);
+	else sprintf(buffer," Lxy:%d:%d   ",FlashDataActive.LjoyXtrim, FlashDataActive.LjoyYtrim);
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3)  sprintf(buffer,"*");
-	else sprintf(buffer," ");
+	if(pos==Line3)  sprintf(buffer,"*Rxy:%d:%d   ",FlashDataActive.RjoyXtrim, FlashDataActive.RjoyYtrim );
+	else sprintf(buffer," Rxy:%d:%d   ",FlashDataActive.RjoyXtrim, FlashDataActive.RjoyYtrim );
 	LCD_print(buffer,1,3);
 
 	if(pos==Line4)  sprintf(buffer,"*");
