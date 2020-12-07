@@ -85,6 +85,10 @@ uint32_t MainInitDoneFlag=0;
 struct FlashDatastruct FlashDataDefault; //Default constant embedded in Code
 struct FlashDatastruct FlashDataFlash;  //Constants read from Flash
 struct FlashDatastruct FlashDataActive; //Active constants
+struct DroneDataStruct DroneDataRX;
+struct DroneDataStruct DroneDataTX;
+float DroneTuneStep=1.0;
+uint32_t DroneTuneStepInt=1;
 
 //LCD MENUS
 MenuLvL CurrentLvl;
@@ -279,6 +283,27 @@ int main(void)
 	  	  	  case ButtonScreen1:{CurrentScreen=ButtonScreen2;}break;
 	  	  	  case ButtonScreen2:{CurrentScreen=ButtonScreen3;}break;
 	  	  	  case ButtonScreen3:{CurrentScreen=ButtonScreen1;}break;
+
+	  	  	  case Param1TuneScreen:{CurrentScreen=Param2TuneScreen;}break;
+	  	  	  case Param2TuneScreen:{CurrentScreen=Param3TuneScreen;}break;
+	  	  	  case Param3TuneScreen:{CurrentScreen=Param4TuneScreen;}break;
+	  	  	  case Param4TuneScreen:{CurrentScreen=Param5TuneScreen;}break;
+	  	  	  case Param5TuneScreen:{CurrentScreen=Param6TuneScreen;}break;
+	  	  	  case Param6TuneScreen:{CurrentScreen=Param7TuneScreen;}break;
+	  	  	  case Param7TuneScreen:{CurrentScreen=Param8TuneScreen;}break;
+	  	  	  case Param8TuneScreen:{CurrentScreen=Param9TuneScreen;}break;
+	  	  	  case Param9TuneScreen:{CurrentScreen=Param10TuneScreen;}break;
+	  	  	  case Param10TuneScreen:{CurrentScreen=Param11TuneScreen;}break;
+	  	  	  case Param11TuneScreen:{CurrentScreen=Param12TuneScreen;}break;
+	  	  	  case Param12TuneScreen:{CurrentScreen=Param13TuneScreen;}break;
+		  	  case Param13TuneScreen:{CurrentScreen=Param14TuneScreen;}break;
+		  	  case Param14TuneScreen:{CurrentScreen=Param15TuneScreen;}break;
+			  case Param15TuneScreen:{CurrentScreen=Param16TuneScreen;}break;
+			  case Param16TuneScreen:{CurrentScreen=Param17TuneScreen;}break;
+			  case Param17TuneScreen:{CurrentScreen=Param18TuneScreen;}break;
+			  case Param18TuneScreen:{CurrentScreen=Param19TuneScreen;}break;
+			  case Param19TuneScreen:{CurrentScreen=Param20TuneScreen;}break;
+			  case Param20TuneScreen:{CurrentScreen=Param1TuneScreen;}break;
 	  	  }
 
 		  MenuPlus=0;
@@ -298,6 +323,27 @@ int main(void)
 	  	  	  case ButtonScreen1:{CurrentScreen=ButtonScreen3;}break;
 	  	  	  case ButtonScreen2:{CurrentScreen=ButtonScreen1;}break;
 	  	  	  case ButtonScreen3:{CurrentScreen=ButtonScreen2;}break;
+
+	  	  	  case Param1TuneScreen:{CurrentScreen=Param20TuneScreen;}break;
+	  	  	  case Param2TuneScreen:{CurrentScreen=Param1TuneScreen;}break;
+	  	  	  case Param3TuneScreen:{CurrentScreen=Param2TuneScreen;}break;
+	  	  	  case Param4TuneScreen:{CurrentScreen=Param3TuneScreen;}break;
+	  	  	  case Param5TuneScreen:{CurrentScreen=Param4TuneScreen;}break;
+	  	  	  case Param6TuneScreen:{CurrentScreen=Param5TuneScreen;}break;
+	  	  	  case Param7TuneScreen:{CurrentScreen=Param6TuneScreen;}break;
+	  	  	  case Param8TuneScreen:{CurrentScreen=Param7TuneScreen;}break;
+	  	  	  case Param9TuneScreen:{CurrentScreen=Param8TuneScreen;}break;
+	  	  	  case Param10TuneScreen:{CurrentScreen=Param9TuneScreen;}break;
+	  	  	  case Param11TuneScreen:{CurrentScreen=Param10TuneScreen;}break;
+	  	  	  case Param12TuneScreen:{CurrentScreen=Param11TuneScreen;}break;
+		  	  case Param13TuneScreen:{CurrentScreen=Param12TuneScreen;}break;
+		  	  case Param14TuneScreen:{CurrentScreen=Param13TuneScreen;}break;
+			  case Param15TuneScreen:{CurrentScreen=Param14TuneScreen;}break;
+			  case Param16TuneScreen:{CurrentScreen=Param15TuneScreen;}break;
+			  case Param17TuneScreen:{CurrentScreen=Param16TuneScreen;}break;
+			  case Param18TuneScreen:{CurrentScreen=Param17TuneScreen;}break;
+			  case Param19TuneScreen:{CurrentScreen=Param18TuneScreen;}break;
+			  case Param20TuneScreen:{CurrentScreen=Param19TuneScreen;}break;
 	  	  }
 
 		  MenuMinus=0;
@@ -328,6 +374,8 @@ int main(void)
                   	  	  	  	 }break;
 
                   	  case Line4:{CurrentScreen=CommandScreen1;}break;
+
+                  	  case Line5:{CurrentScreen=Param1TuneScreen;}break;
             	  }
               }break;
 
@@ -362,6 +410,26 @@ int main(void)
 		      case FlashDataScreenRd:{CurrentScreen=MenuScreen1;}break;
 		      case FlashDataScreenWr:{CurrentScreen=MenuScreen1;}break;
 		      case CommandScreen1:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param1TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param2TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param3TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param4TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param5TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param6TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param7TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param8TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param9TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param10TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param11TuneScreen:{CurrentScreen=MenuScreen1;}break;
+	  	  	  case Param12TuneScreen:{CurrentScreen=MenuScreen1;}break;
+		  	  case Param13TuneScreen:{CurrentScreen=MenuScreen1;}break;
+		  	  case Param14TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param15TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param16TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param17TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param18TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param19TuneScreen:{CurrentScreen=MenuScreen1;}break;
+			  case Param20TuneScreen:{CurrentScreen=MenuScreen1;}break;
 		  }
 		  LvlDown=0;
 		  CurrentCursorPos = Line0;//reset cursor
@@ -369,7 +437,6 @@ int main(void)
 
 	  if(CursorUp)//Cursor Up-------------------------------------------------------------------------------------------------------------------------
 	  {
-		  LCD_clrScr();
 		  if(CurrentCursorPos == Line0)CurrentCursorPos=Line5;
 		  else CurrentCursorPos--;
 
@@ -378,7 +445,6 @@ int main(void)
 
 	  if(CursorDown)//Cursor Down---------------------------------------------------------------------------------------------------------------------
 	  {
-		  LCD_clrScr();
 		  if(CurrentCursorPos == Line5)CurrentCursorPos=Line0;
 		  else CurrentCursorPos++;
 
@@ -387,7 +453,6 @@ int main(void)
 
 	  if(ValuePlus)//Value Plus---------------------------------------------------------------------------------------------------------------------
 	  {
-		  LCD_clrScr();
 
 		  switch(CurrentScreen)
 		  {
@@ -403,14 +468,40 @@ int main(void)
 		  			case Line5:{};break;
 		  		}
 		  	  }break;
+
+			  case Param1TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_pitch+=DroneTuneStep; else DroneTuneStep*=10; }break;
+			  case Param2TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_pitch+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param3TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_pitch+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param4TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_roll+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param5TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_roll+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param6TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_roll+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param7TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_yaw+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param8TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_yaw+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param9TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_yaw+=DroneTuneStep; else DroneTuneStep*=10;}break;
+			  case Param10TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_pitch+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param11TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_pitch+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param12TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_roll+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param13TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_roll+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param14TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_yaw+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param15TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_yaw+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param16TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxpitchdegree+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param17TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxrolldegree+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param18TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxyawdegree+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param19TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.minthrottle+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
+			  case Param20TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxthrottle+=DroneTuneStepInt; else DroneTuneStepInt*=10;}break;
 		  }
+
+		  if(DroneTuneStep>DRONETUNESTEPMAX)DroneTuneStep=DRONETUNESTEPMAX;
+		  if(DroneTuneStep<DRONETUNESTEPMIN)DroneTuneStep=DRONETUNESTEPMIN;
+
+		  if(DroneTuneStepInt>DRONETUNESTEPINTMAX)DroneTuneStepInt=DRONETUNESTEPINTMAX;
+		  if(DroneTuneStepInt<DRONETUNESTEPINTMIN)DroneTuneStepInt=DRONETUNESTEPINTMIN;
 
 		  ValuePlus=0;
 	  }
 
 	  if(ValueMinus)//Value Minus---------------------------------------------------------------------------------------------------------------------
 	  {
-		  LCD_clrScr();
 
 		  switch(CurrentScreen)
 		  {
@@ -426,7 +517,34 @@ int main(void)
 		  			case Line5:{};break;
 		  		}
 		  	  }break;
+
+			  case Param1TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_pitch-=DroneTuneStep; else DroneTuneStep/=10; }break;
+			  case Param2TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_pitch-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param3TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_pitch-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param4TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_roll-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param5TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_roll-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param6TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_roll-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param7TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_p_gain_yaw-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param8TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_gain_yaw-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param9TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_d_gain_yaw-=DroneTuneStep; else DroneTuneStep/=10;}break;
+			  case Param10TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_pitch-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param11TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_pitch-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param12TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_roll-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param13TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_roll-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param14TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_max_yaw-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param15TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.pid_i_max_yaw-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param16TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxpitchdegree-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param17TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxrolldegree-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param18TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxyawdegree-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param19TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.minthrottle-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
+			  case Param20TuneScreen:{if(CurrentCursorPos!=Line1)DroneDataTX.maxthrottle-=DroneTuneStepInt; else DroneTuneStepInt/=10;}break;
 		  }
+
+		  if(DroneTuneStep>DRONETUNESTEPMAX)DroneTuneStep=DRONETUNESTEPMAX;
+		  if(DroneTuneStep<DRONETUNESTEPMIN)DroneTuneStep=DRONETUNESTEPMIN;
+
+		  if(DroneTuneStepInt>DRONETUNESTEPINTMAX)DroneTuneStepInt=DRONETUNESTEPINTMAX;
+		  if(DroneTuneStepInt<DRONETUNESTEPINTMIN)DroneTuneStepInt=DRONETUNESTEPINTMIN;
 
 		  ValueMinus=0;
 	  }
@@ -445,6 +563,26 @@ int main(void)
 	  		case FlashDataScreenRd:{FlashDataScreenRdPrint(stringlcdBuffer);}break;
 	  		case FlashDataScreenWr:{FlashDataScreenWrPrint(stringlcdBuffer,CurrentCursorPos);}break;
 	  		case CommandScreen1:{CommandScreen1Print(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param1TuneScreen:{Param1TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param2TuneScreen:{Param2TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param3TuneScreen:{Param3TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param4TuneScreen:{Param4TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param5TuneScreen:{Param5TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param6TuneScreen:{Param6TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param7TuneScreen:{Param7TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param8TuneScreen:{Param8TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param9TuneScreen:{Param9TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param10TuneScreen:{Param10TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param11TuneScreen:{Param11TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+	  	  	case Param12TuneScreen:{Param12TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+		  	case Param13TuneScreen:{Param13TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+		  	case Param14TuneScreen:{Param14TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param15TuneScreen:{Param15TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param16TuneScreen:{Param16TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param17TuneScreen:{Param17TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param18TuneScreen:{Param18TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param19TuneScreen:{Param19TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
+			case Param20TuneScreen:{Param20TuneScreenPrint(stringlcdBuffer,CurrentCursorPos);}break;
 	  }
 
 	  //test1=DWT->CYCCNT;

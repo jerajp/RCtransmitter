@@ -74,9 +74,14 @@ extern "C" {
 #define COMWRITEFLASH	2
 #define COMINPUTPARAM1	3
 
+//Drone param Tune limits
+#define DRONETUNESTEPMIN 0.0001
+#define DRONETUNESTEPMAX 100
+#define DRONETUNESTEPINTMIN 1
+#define DRONETUNESTEPINTMAX 100
 //Menu data
 typedef enum {LVL0,LVL1}MenuLvL;
-typedef enum {MainScreen, MenuScreen1,MSGScreen1,ButtonScreen1,ButtonScreen2,ButtonScreen3,TestScreen1,FlashDataScreenRd,FlashDataScreenWr, CommandScreen1 }LCDScreen;
+typedef enum {MainScreen, MenuScreen1,MSGScreen1,ButtonScreen1,ButtonScreen2,ButtonScreen3,TestScreen1,FlashDataScreenRd,FlashDataScreenWr, CommandScreen1, Param1TuneScreen, Param2TuneScreen,Param3TuneScreen,Param4TuneScreen,Param5TuneScreen,Param6TuneScreen,Param7TuneScreen,Param8TuneScreen,Param9TuneScreen,Param10TuneScreen,Param11TuneScreen,Param12TuneScreen,Param13TuneScreen,Param14TuneScreen,Param15TuneScreen,Param16TuneScreen,Param17TuneScreen,Param18TuneScreen,Param19TuneScreen,Param20TuneScreen }LCDScreen;
 typedef enum {Line0,Line1,Line2,Line3,Line4,Line5}CursorPositions;
 
 
@@ -89,6 +94,34 @@ struct FlashDatastruct
 	int32_t RjoyXtrim;
 	int32_t RjoyYtrim;
 };
+
+struct DroneDataStruct
+{
+	float pid_p_gain_pitch;  //Gain setting for the pitch P-controller
+	float pid_i_gain_pitch;  //Gain setting for the pitch I-controller
+	float pid_d_gain_pitch;  //Gain setting for the pitch D-controller
+	float pid_p_gain_roll;   //Gain setting for the roll P-controller
+	float pid_i_gain_roll;   //Gain setting for the roll I-controller
+	float pid_d_gain_roll;   //Gain setting for the roll D-controller
+	float pid_p_gain_yaw;    //Gain setting for the pitch P-controller
+	float pid_i_gain_yaw;    //Gain setting for the pitch I-controller
+	float pid_d_gain_yaw;    //Gain setting for the pitch D-controller
+	uint32_t pid_max_pitch; 	//Maximum output of the PID-controller (+/-)
+	uint32_t pid_i_max_pitch; 	//Maximum output of the Integral part
+	uint32_t pid_max_roll;      //Maximum output of the PID-controller (+/-)
+	uint32_t pid_i_max_roll;    //Maximum output of the Integral part
+	uint32_t pid_max_yaw;       //Maximum output of the PID-controller (+/-)
+	uint32_t pid_i_max_yaw;     //Maximum output of the Integral part
+	uint32_t maxpitchdegree;    //degrees
+	uint32_t maxrolldegree;     //degrees
+	uint32_t maxyawdegree;      //degrees
+	uint32_t minthrottle;       //80counts of 1000 to keep rotors spinning
+	uint32_t maxthrottle;       //800counts of 1000 (80%)
+};
+
+
+
+
 
 /* USER CODE END EC */
 
