@@ -79,11 +79,50 @@ extern "C" {
 #define DRONETUNESTEPMAX 100
 #define DRONETUNESTEPINTMIN 1
 #define DRONETUNESTEPINTMAX 100
+
+//PARAM LIMITS
+#define MINTHROTTLE		0
+#define MAXTHROTTLE		1000
+#define MINREGPARAM 	(float)(0)
+#define MAXREGPARAM 	(float)(100000.0)
+#define MINPIDPARAM 	0
+#define MAXPIDPARAM 	1000
+#define MINDEGREEPARAM	0
+#define MAXDEGREEPARAM	360
+#define PARAMMULTUPLITER 100000 //multiply float values for WIFI transfer
+
+//DRONE TUNNING COMMANDS
+#define COMMCONTROLDATA 	0  //normal control data
+#define COMMPARAMACTIVE		1  //Param Send to Drone ->MSG saves in Active Structure - And Drone Returns Value
+#define COMMPARAMFLASH  	2  //Get Parameter from Drone Flash
+#define COMMERASEFLASHDR	3
+#define COMMWRITEFLASHDR	4
+
+#define PARAM1 1
+#define PARAM2 2
+#define PARAM3 3
+#define PARAM4 4
+#define PARAM5 5
+#define PARAM6 6
+#define PARAM7 7
+#define PARAM8 8
+#define PARAM9 9
+#define PARAM10 10
+#define PARAM11 11
+#define PARAM12 12
+#define PARAM13 13
+#define PARAM14 14
+#define PARAM15 15
+#define PARAM16 16
+#define PARAM17 17
+#define PARAM18 18
+#define PARAM19 19
+#define PARAM20 20
+
 //Menu data
 typedef enum {LVL0,LVL1}MenuLvL;
 typedef enum {MainScreen, MenuScreen1,MSGScreen1,ButtonScreen1,ButtonScreen2,ButtonScreen3,TestScreen1,FlashDataScreenRd,FlashDataScreenWr, CommandScreen1, Param1TuneScreen, Param2TuneScreen,Param3TuneScreen,Param4TuneScreen,Param5TuneScreen,Param6TuneScreen,Param7TuneScreen,Param8TuneScreen,Param9TuneScreen,Param10TuneScreen,Param11TuneScreen,Param12TuneScreen,Param13TuneScreen,Param14TuneScreen,Param15TuneScreen,Param16TuneScreen,Param17TuneScreen,Param18TuneScreen,Param19TuneScreen,Param20TuneScreen }LCDScreen;
 typedef enum {Line0,Line1,Line2,Line3,Line4,Line5}CursorPositions;
-
 
 struct FlashDatastruct
 {
@@ -106,17 +145,17 @@ struct DroneDataStruct
 	float pid_p_gain_yaw;    //Gain setting for the pitch P-controller
 	float pid_i_gain_yaw;    //Gain setting for the pitch I-controller
 	float pid_d_gain_yaw;    //Gain setting for the pitch D-controller
-	uint32_t pid_max_pitch; 	//Maximum output of the PID-controller (+/-)
-	uint32_t pid_i_max_pitch; 	//Maximum output of the Integral part
-	uint32_t pid_max_roll;      //Maximum output of the PID-controller (+/-)
-	uint32_t pid_i_max_roll;    //Maximum output of the Integral part
-	uint32_t pid_max_yaw;       //Maximum output of the PID-controller (+/-)
-	uint32_t pid_i_max_yaw;     //Maximum output of the Integral part
-	uint32_t maxpitchdegree;    //degrees
-	uint32_t maxrolldegree;     //degrees
-	uint32_t maxyawdegree;      //degrees
-	uint32_t minthrottle;       //80counts of 1000 to keep rotors spinning
-	uint32_t maxthrottle;       //800counts of 1000 (80%)
+	int32_t pid_max_pitch; 	//Maximum output of the PID-controller (+/-)
+	int32_t pid_i_max_pitch; 	//Maximum output of the Integral part
+	int32_t pid_max_roll;      //Maximum output of the PID-controller (+/-)
+	int32_t pid_i_max_roll;    //Maximum output of the Integral part
+	int32_t pid_max_yaw;       //Maximum output of the PID-controller (+/-)
+	int32_t pid_i_max_yaw;     //Maximum output of the Integral part
+	int32_t maxpitchdegree;    //degrees
+	int32_t maxrolldegree;     //degrees
+	int32_t maxyawdegree;      //degrees
+	int32_t minthrottle;       //80counts of 1000 to keep rotors spinning
+	int32_t maxthrottle;       //800counts of 1000 (80%)
 };
 
 

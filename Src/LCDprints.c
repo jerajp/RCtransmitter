@@ -27,8 +27,12 @@ extern uint32_t TJoyRightXPlusStatusDebounce,TJoyRightXMinusStatusDebounce,TJoyR
 extern struct FlashDatastruct FlashDataDefault;
 extern struct FlashDatastruct FlashDataFlash;
 extern struct FlashDatastruct FlashDataActive;
-struct DroneDataStruct DroneDataRX;
-struct DroneDataStruct DroneDataTX;
+
+extern struct DroneDataStruct DroneDataActive;
+extern struct DroneDataStruct DroneDataFlash;
+extern struct DroneDataStruct DroneDataTemp;
+extern struct DroneDataStruct DroneDataInput;
+
 extern float DroneTuneStep;
 extern uint32_t DroneTuneStepInt;
 
@@ -242,12 +246,12 @@ void CommandScreen1Print(char *buffer, CursorPositions pos)
 	else sprintf(buffer," EraseFlData");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3)  sprintf(buffer,"*");
-	else sprintf(buffer," ");
+	if(pos==Line3)  sprintf(buffer,"*WriteFlDrone");
+	else sprintf(buffer," WriteFlDrone");
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4)  sprintf(buffer,"*");
-	else sprintf(buffer," ");
+	if(pos==Line4)  sprintf(buffer,"*EraseFlDrone");
+	else sprintf(buffer," EraseFlDrone");
 	LCD_print(buffer,1,4);
 
 	if(pos==Line5)  sprintf(buffer,"*");
@@ -267,20 +271,20 @@ void Param1TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_p_gain_pitch);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_p_gain_pitch);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_p_gain_pitch);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_p_gain_pitch);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_p_gain_pitch);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_p_gain_pitch);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_p_gain_pitch);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_p_gain_pitch);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_p_gain_pitch);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_p_gain_pitch);
 	LCD_print(buffer,1,5);
 
 }
@@ -294,20 +298,20 @@ void Param2TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_i_gain_pitch);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_i_gain_pitch);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_i_gain_pitch);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_i_gain_pitch);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_i_gain_pitch);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_i_gain_pitch);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_i_gain_pitch);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_i_gain_pitch);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_i_gain_pitch);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_i_gain_pitch);
 	LCD_print(buffer,1,5);
 }
 void Param3TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -320,20 +324,20 @@ void Param3TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f      ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_d_gain_pitch);
+	else sprintf(buffer,"T:%.4f     ",DroneDataInput.pid_d_gain_pitch);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_d_gain_pitch);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_d_gain_pitch);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_d_gain_pitch);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_d_gain_pitch);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_d_gain_pitch);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_d_gain_pitch);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_d_gain_pitch);
+	else sprintf(buffer,"F:%.4f     ",DroneDataFlash.pid_d_gain_pitch);
 	LCD_print(buffer,1,5);
 }
 void Param4TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -346,20 +350,20 @@ void Param4TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_p_gain_roll);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_p_gain_roll);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_p_gain_roll);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_p_gain_roll);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_p_gain_roll);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_p_gain_roll);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_p_gain_roll);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_p_gain_roll);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_p_gain_roll);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_p_gain_roll);
 	LCD_print(buffer,1,5);
 }
 void Param5TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -372,20 +376,20 @@ void Param5TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_i_gain_roll);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_i_gain_roll);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_i_gain_roll);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_i_gain_roll);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_i_gain_roll);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_i_gain_roll);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_i_gain_roll);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_i_gain_roll);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_i_gain_roll);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_i_gain_roll);
 	LCD_print(buffer,1,5);
 }
 void Param6TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -398,20 +402,20 @@ void Param6TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_d_gain_roll);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_d_gain_roll);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_d_gain_roll);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_d_gain_roll);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_d_gain_roll);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_d_gain_roll);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_d_gain_roll);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_d_gain_roll);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_d_gain_roll);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_d_gain_roll);
 	LCD_print(buffer,1,5);
 }
 void Param7TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -424,20 +428,20 @@ void Param7TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f      ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_p_gain_yaw);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_p_gain_yaw);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_p_gain_yaw);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_p_gain_yaw);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_p_gain_yaw);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_p_gain_yaw);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_p_gain_yaw);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_p_gain_yaw);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_p_gain_yaw);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_p_gain_yaw);
 	LCD_print(buffer,1,5);
 }
 void Param8TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -450,20 +454,20 @@ void Param8TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_i_gain_yaw);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_i_gain_yaw);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_i_gain_yaw);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_i_gain_yaw);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_i_gain_yaw);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_i_gain_yaw);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_i_gain_yaw);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_i_gain_yaw);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_i_gain_yaw);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_i_gain_yaw);
 	LCD_print(buffer,1,5);
 }
 void Param9TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -476,20 +480,20 @@ void Param9TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%.4f     ",DroneTuneStep);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_d_gain_yaw);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_d_gain_yaw);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%.4f",DroneDataRX.pid_d_gain_yaw);
-	else sprintf(buffer," R:%.4f",DroneDataRX.pid_d_gain_yaw);
+	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_d_gain_yaw);
+	else sprintf(buffer," R:%.4f     ",DroneDataActive.pid_d_gain_yaw);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%.4f",DroneDataTX.pid_d_gain_yaw);
-	else sprintf(buffer," T:%.4f",DroneDataTX.pid_d_gain_yaw);
+	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_d_gain_yaw);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_d_gain_yaw);
 	LCD_print(buffer,1,5);
 }
 void Param10TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -503,20 +507,20 @@ void Param10TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_max_pitch);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_max_pitch);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_max_pitch);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_max_pitch);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_max_pitch);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_max_pitch);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_max_pitch);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_max_pitch);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_max_pitch);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_max_pitch);
 	LCD_print(buffer,1,5);
 
 }
@@ -530,20 +534,20 @@ void Param11TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_i_max_pitch);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_i_max_pitch);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_i_max_pitch);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_i_max_pitch);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_i_max_pitch);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_i_max_pitch);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_i_max_pitch);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_i_max_pitch);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_i_max_pitch);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_i_max_pitch);
 	LCD_print(buffer,1,5);
 }
 void Param12TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -556,20 +560,20 @@ void Param12TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_max_roll);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_max_roll);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_max_roll);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_max_roll);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_max_roll);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_max_roll);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_max_roll);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_max_roll);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_max_roll);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_max_roll);
 	LCD_print(buffer,1,5);
 }
 void Param13TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -582,20 +586,20 @@ void Param13TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_i_max_roll);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_i_max_roll);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_i_max_roll);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_i_max_roll);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_i_max_roll);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_i_max_roll);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_i_max_roll);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_i_max_roll);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_i_max_roll);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_i_max_roll);
 	LCD_print(buffer,1,5);
 }
 void Param14TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -608,20 +612,20 @@ void Param14TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_max_yaw);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_max_yaw);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_max_yaw);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_max_yaw);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_max_yaw);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_max_yaw);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_max_yaw);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_max_yaw);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_max_yaw);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_max_yaw);
 	LCD_print(buffer,1,5);
 }
 void Param15TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -634,20 +638,20 @@ void Param15TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.pid_i_max_yaw);
+	else sprintf(buffer," T:%d     ",DroneDataInput.pid_i_max_yaw);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.pid_i_max_yaw);
-	else sprintf(buffer," R:%u",DroneDataRX.pid_i_max_yaw);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.pid_i_max_yaw);
+	else sprintf(buffer," R:%d     ",DroneDataActive.pid_i_max_yaw);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.pid_i_max_yaw);
-	else sprintf(buffer," T:%u",DroneDataTX.pid_i_max_yaw);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.pid_i_max_yaw);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.pid_i_max_yaw);
 	LCD_print(buffer,1,5);
 }
 void Param16TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -660,20 +664,20 @@ void Param16TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.maxpitchdegree);
+	else sprintf(buffer," T:%d     ",DroneDataInput.maxpitchdegree);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.maxpitchdegree);
-	else sprintf(buffer," R:%u",DroneDataRX.maxpitchdegree);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.maxpitchdegree);
+	else sprintf(buffer," R:%d     ",DroneDataActive.maxpitchdegree);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.maxpitchdegree);
-	else sprintf(buffer," T:%u",DroneDataTX.maxpitchdegree);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.maxpitchdegree);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.maxpitchdegree);
 	LCD_print(buffer,1,5);
 }
 void Param17TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -686,20 +690,20 @@ void Param17TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.maxrolldegree);
+	else sprintf(buffer," T:%d     ",DroneDataInput.maxrolldegree);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.maxrolldegree);
-	else sprintf(buffer," R:%u",DroneDataRX.maxrolldegree);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.maxrolldegree);
+	else sprintf(buffer," R:%d    ",DroneDataActive.maxrolldegree);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.maxrolldegree);
-	else sprintf(buffer," T:%u",DroneDataTX.maxrolldegree);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.maxrolldegree);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.maxrolldegree);
 	LCD_print(buffer,1,5);
 }
 void Param18TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -712,20 +716,20 @@ void Param18TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.maxyawdegree);
+	else sprintf(buffer," T:%d     ",DroneDataInput.maxyawdegree);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.maxyawdegree);
-	else sprintf(buffer," R:%u",DroneDataRX.maxyawdegree);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.maxyawdegree);
+	else sprintf(buffer," R:%d     ",DroneDataActive.maxyawdegree);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.maxyawdegree);
-	else sprintf(buffer," T:%u",DroneDataTX.maxyawdegree);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.maxyawdegree);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.maxyawdegree);
 	LCD_print(buffer,1,5);
 }
 void Param19TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -738,20 +742,20 @@ void Param19TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.minthrottle);
+	else sprintf(buffer," T:%d     ",DroneDataInput.minthrottle);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.minthrottle);
-	else sprintf(buffer," R:%u",DroneDataRX.minthrottle);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.minthrottle);
+	else sprintf(buffer," R:%d     ",DroneDataActive.minthrottle);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.minthrottle);
-	else sprintf(buffer," T:%u",DroneDataTX.minthrottle);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.minthrottle);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.minthrottle);
 	LCD_print(buffer,1,5);
 }
 void Param20TuneScreenPrint(char *buffer, CursorPositions pos)
@@ -764,20 +768,20 @@ void Param20TuneScreenPrint(char *buffer, CursorPositions pos)
 	else sprintf(buffer," Stp:%u     ",DroneTuneStepInt);
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2) sprintf(buffer,"*Get Value");
-	else sprintf(buffer," Get Value");
+	if(pos==Line2) sprintf(buffer,"*Get Fl Value");
+	else sprintf(buffer," Get Fl Value");
 	LCD_print(buffer,1,2);
 
-	if(pos==Line3) sprintf(buffer,"*Send Value");
-	else sprintf(buffer," Send Value");
+	if(pos==Line3) sprintf(buffer,"*T:%d     ",DroneDataInput.maxthrottle);
+	else sprintf(buffer," T:%d     ",DroneDataInput.maxthrottle);
 	LCD_print(buffer,1,3);
 
-	if(pos==Line4) sprintf(buffer,"*R:%u",DroneDataRX.maxthrottle);
-	else sprintf(buffer," R:%u",DroneDataRX.maxthrottle);
+	if(pos==Line4) sprintf(buffer,"*R:%d     ",DroneDataActive.maxthrottle);
+	else sprintf(buffer," R:%d     ",DroneDataActive.maxthrottle);
 	LCD_print(buffer,1,4);
 
-	if(pos==Line5) sprintf(buffer,"*T:%u",DroneDataTX.maxthrottle);
-	else sprintf(buffer," T:%u",DroneDataTX.maxthrottle);
+	if(pos==Line5) sprintf(buffer,"*F:%d     ",DroneDataFlash.maxthrottle);
+	else sprintf(buffer," F:%d     ",DroneDataFlash.maxthrottle);
 	LCD_print(buffer,1,5);
 }
 

@@ -131,8 +131,15 @@ uint32_t MSGprerSecond;
 uint32_t MSGLowCount;
 uint32_t ConnectWeakFlag=1;
 uint32_t  LoopCounter=0;
-uint32_t MSGSelectorTX;
-uint32_t MSGSelectorRX;
+
+uint8_t MSGParameterTX; //Parameter selector Byte
+uint8_t MSGParameterRX; //Parameter selector Byte
+
+uint32_t MSGParamDataTX; //Parameter Data multiplied for 32bit format
+uint32_t MSGParamDataRX; //Parameter Data multiplied for 32bit format
+
+uint8_t MSGCommTX=COMMCONTROLDATA;	  //MSG Type (Control Data, Active Parameter, Flash Parameter, Write/Erase Flash)
+uint8_t MSGCommRX;  				  //MSG Type (Control Data, Active Parameter, Flash Parameter, Write/Erase Flash)
 
 //RC remote commands
 uint32_t CommShtdownnrf24;
@@ -154,6 +161,7 @@ uint32_t i;
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
+
 extern TIM_HandleTypeDef htim4;
 extern I2C_HandleTypeDef hi2c2;
 
@@ -178,6 +186,11 @@ extern uint32_t MenuPlus,MenuMinus;
 extern uint32_t ValuePlus,ValueMinus;
 extern uint32_t CursorUp,CursorDown;
 extern struct FlashDatastruct FlashDataActive;
+extern struct DroneDataStruct DroneDataActive;
+extern struct DroneDataStruct DroneDataFlash;
+extern struct DroneDataStruct DroneDataTemp;
+extern struct DroneDataStruct DroneDataInput;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -888,6 +901,34 @@ void SysTick_Handler(void)
 	 DroneBattPanicCount=0;
  }
 
+ //Calculate Parameters for sending
+ if(MSGCommTX !=0 )
+ {
+	 switch(MSGParameterTX)
+	 {
+	 	 case PARAM1: {MSGParamDataTX=DroneDataInput.pid_p_gain_pitch*PARAMMULTUPLITER;}break;
+	 	 case PARAM2: {MSGParamDataTX=DroneDataInput.pid_i_gain_pitch*PARAMMULTUPLITER;}break;
+	 	 case PARAM3: {MSGParamDataTX=DroneDataInput.pid_d_gain_pitch*PARAMMULTUPLITER;}break;
+	 	 case PARAM4: {MSGParamDataTX=DroneDataInput.pid_p_gain_roll*PARAMMULTUPLITER;}break;
+	 	 case PARAM5: {MSGParamDataTX=DroneDataInput.pid_i_gain_roll*PARAMMULTUPLITER;}break;
+	 	 case PARAM6: {MSGParamDataTX=DroneDataInput.pid_d_gain_roll*PARAMMULTUPLITER;}break;
+	 	 case PARAM7: {MSGParamDataTX=DroneDataInput.pid_p_gain_yaw*PARAMMULTUPLITER;}break;
+	 	 case PARAM8: {MSGParamDataTX=DroneDataInput.pid_i_gain_yaw*PARAMMULTUPLITER;}break;
+	 	 case PARAM9: {MSGParamDataTX=DroneDataInput.pid_d_gain_yaw*PARAMMULTUPLITER;}break;
+	 	 case PARAM10: {MSGParamDataTX=DroneDataInput.pid_max_pitch*PARAMMULTUPLITER;}break;
+	 	 case PARAM11: {MSGParamDataTX=DroneDataInput.pid_i_max_pitch*PARAMMULTUPLITER;}break;
+	 	 case PARAM12: {MSGParamDataTX=DroneDataInput.pid_max_roll*PARAMMULTUPLITER;}break;
+	 	 case PARAM13: {MSGParamDataTX=DroneDataInput.pid_i_max_roll*PARAMMULTUPLITER;}break;
+	 	 case PARAM14: {MSGParamDataTX=DroneDataInput.pid_max_yaw*PARAMMULTUPLITER;}break;
+	 	 case PARAM15: {MSGParamDataTX=DroneDataInput.pid_i_max_yaw*PARAMMULTUPLITER;}break;
+	 	 case PARAM16: {MSGParamDataTX=DroneDataInput.maxpitchdegree*PARAMMULTUPLITER;}break;
+	 	 case PARAM17: {MSGParamDataTX=DroneDataInput.maxrolldegree*PARAMMULTUPLITER;}break;
+	 	 case PARAM18: {MSGParamDataTX=DroneDataInput.maxyawdegree*PARAMMULTUPLITER;}break;
+	 	 case PARAM19: {MSGParamDataTX=DroneDataInput.minthrottle*PARAMMULTUPLITER;}break;
+	 	 case PARAM20: {MSGParamDataTX=DroneDataInput.maxthrottle*PARAMMULTUPLITER;}break;
+	 }
+ }
+
  //NRF24---------------------------------------------------------------------------------------
  if(MainInitDoneFlag && CommShtdownnrf24!=1)
  {
@@ -908,14 +949,40 @@ void SysTick_Handler(void)
 					TotalMSGsend++;
 
 					//SEND DATA TO DRONE
-					nRF24_payloadTX[0] = MSGSelectorTX;
-					nRF24_payloadTX[1] = (uint8_t)(LjoyUPDOWN);
-					nRF24_payloadTX[2] = (uint8_t)(LjoyLEFTRIGHT);
-					nRF24_payloadTX[3] = (uint8_t)(DjoyUPDOWN);
-					nRF24_payloadTX[4] = (uint8_t)(DjoyLEFTRIGHT);
-					nRF24_payloadTX[5] = (uint8_t)(potenc1);
-					nRF24_payloadTX[6] = (uint8_t)(potenc2);
-					nRF24_payloadTX[7] = (uint8_t)(Buttons);
+					nRF24_payloadTX[0] = MSGCommTX;
+
+					if(MSGCommTX==COMMCONTROLDATA)
+					{
+						nRF24_payloadTX[1] = (uint8_t)(LjoyUPDOWN);
+						nRF24_payloadTX[2] = (uint8_t)(LjoyLEFTRIGHT);
+						nRF24_payloadTX[3] = (uint8_t)(DjoyUPDOWN);
+						nRF24_payloadTX[4] = (uint8_t)(DjoyLEFTRIGHT);
+						nRF24_payloadTX[5] = (uint8_t)(potenc1);
+						nRF24_payloadTX[6] = (uint8_t)(potenc2);
+						nRF24_payloadTX[7] = (uint8_t)(Buttons);
+					}
+					else if(MSGCommTX==COMMPARAMACTIVE)
+					{
+						nRF24_payloadTX[1] = MSGParameterTX;
+						nRF24_payloadTX[2] = (MSGParamDataTX & 0xFF000000)>>24;
+						nRF24_payloadTX[3] = (MSGParamDataTX & 0x00FF0000)>>16;
+						nRF24_payloadTX[4] = (MSGParamDataTX & 0x0000FF00)>>8;
+						nRF24_payloadTX[5] = (MSGParamDataTX & 0x000000FF);
+						nRF24_payloadTX[6] = 0;
+						nRF24_payloadTX[7] = 0;
+					}
+					else //Just Command Byte important
+					{
+						nRF24_payloadTX[1] = 0;
+						nRF24_payloadTX[2] = 0;
+						nRF24_payloadTX[3] = 0;
+						nRF24_payloadTX[4] = 0;
+						nRF24_payloadTX[5] = 0;
+						nRF24_payloadTX[6] = 0;
+						nRF24_payloadTX[7] = 0;
+					}
+
+					MSGCommTX=COMMCONTROLDATA;//reset to normal control data
 
 					// Transmit a packet
 					nRF24_TransmitPacket(nRF24_payloadTX, 8);
@@ -947,27 +1014,56 @@ void SysTick_Handler(void)
 			//Clear all pending IRQ flags
 			nRF24_ClearIRQFlags();
 
-			MSGSelectorRX=nRF24_payloadRX[0];
+			MSGCommRX=nRF24_payloadRX[0];
 
-			switch(MSGSelectorRX)
+			if(MSGCommRX==COMMCONTROLDATA) //Drone status
 			{
-				case DRONEDATARETURN:
+				DroneBattLowerByte=nRF24_payloadRX[1];
+				DroneBattUpperByte=nRF24_payloadRX[2];
+				DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+
+				if(nRF24_payloadRX[5] & 0x1)DronePitchAngle=(-1)*nRF24_payloadRX[3];
+				else DronePitchAngle=nRF24_payloadRX[3];
+
+				if((nRF24_payloadRX[5]>>1)& 0x1)DroneRollAngle=(-1)*nRF24_payloadRX[4];
+				else DroneRollAngle=nRF24_payloadRX[4];
+
+				GyroCalibInProgress=(nRF24_payloadRX[5]>>2) & 0x1;
+
+				motorSTAT=(nRF24_payloadRX[5]>>3) & 0x7; //last 3 bits
+			}
+			else if(MSGCommRX==COMMPARAMACTIVE || MSGCommRX==COMMPARAMFLASH)
+			{
+				MSGParameterRX=nRF24_payloadTX[1]; //Get parameter
+
+				MSGParamDataRX=(nRF24_payloadTX[2]<<24) + (nRF24_payloadTX[3]<<16) + (nRF24_payloadTX[4]<<8) + (nRF24_payloadTX[5]); //get data
+
+				switch (MSGParameterRX)
 				{
-					DroneBattLowerByte=nRF24_payloadRX[1];
-					DroneBattUpperByte=nRF24_payloadRX[2];
-					DroneBattmV=(DroneBattUpperByte<<8)+DroneBattLowerByte;
+					case  PARAM1 :{DroneDataTemp.pid_p_gain_pitch=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM2 :{DroneDataTemp.pid_i_gain_pitch=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM3 :{DroneDataTemp.pid_d_gain_pitch=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM4 :{DroneDataTemp.pid_p_gain_roll=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM5 :{DroneDataTemp.pid_i_gain_roll=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM6 :{DroneDataTemp.pid_d_gain_roll=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM7 :{DroneDataTemp.pid_p_gain_yaw=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM8 :{DroneDataTemp.pid_i_gain_yaw=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM9 :{DroneDataTemp.pid_d_gain_yaw=(float)(MSGParamDataRX)/(float)(PARAMMULTUPLITER);}break;
+					case  PARAM10 :{DroneDataTemp.pid_max_pitch=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM11 :{DroneDataTemp.pid_i_max_pitch=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM12 :{DroneDataTemp.pid_max_roll=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM13 :{DroneDataTemp.pid_i_max_roll=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM14 :{DroneDataTemp.pid_max_yaw=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM15 :{DroneDataTemp.pid_i_max_yaw=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM16 :{DroneDataTemp.maxpitchdegree=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM17 :{DroneDataTemp.maxrolldegree=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM18 :{DroneDataTemp.maxyawdegree=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM19 :{DroneDataTemp.minthrottle=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+					case  PARAM20 :{DroneDataTemp.maxthrottle=(int)(MSGParamDataRX/PARAMMULTUPLITER);}break;
+				}
 
-					if(nRF24_payloadRX[5] & 0x1)DronePitchAngle=(-1)*nRF24_payloadRX[3];
-					else DronePitchAngle=nRF24_payloadRX[3];
-
-					if((nRF24_payloadRX[5]>>1)& 0x1)DroneRollAngle=(-1)*nRF24_payloadRX[4];
-					else DroneRollAngle=nRF24_payloadRX[4];
-
-					GyroCalibInProgress=(nRF24_payloadRX[5]>>2) & 0x1;
-
-					motorSTAT=(nRF24_payloadRX[5]>>3) & 0x7; //last 3 bits
-				}break;
-
+				if(MSGCommRX==COMMPARAMACTIVE)DroneDataActive=DroneDataTemp; //Parameters are active ones
+				else DroneDataFlash=DroneDataTemp; 								 //Parameters are from Flash
 			}
 			TotalMSGrecv++;
 			MSGcount++;
