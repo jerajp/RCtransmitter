@@ -81,6 +81,9 @@ uint32_t Batt1cellAVG;
 uint32_t batthistindx=0;
 uint32_t BAttmVhist[BATTAVERAGETIME];
 
+//LED blink
+uint32_t LED4blinkcount;
+
 //Status
 uint32_t motorSTAT=0;
 
@@ -811,8 +814,10 @@ void SysTick_Handler(void)
 	  if( (Batt1cellAVG < MINREMOTEBATT) ||  (DroneBattmV < MINDRONEBATT) ) LED3ON;
 	  else LED3OFF;
 
-	  //LED4 OFF
-	  LED4OFF;
+	  //LED4 blinking
+	  if(LED4blinkcount>0)LED4blinkcount--;
+	  if(LED4blinkcount!=0)LED4ON;
+	  else LED4OFF;
   }
 
 
@@ -971,7 +976,17 @@ void SysTick_Handler(void)
 						nRF24_payloadTX[6] = 0;
 						nRF24_payloadTX[7] = 0;
 					}
-					else //Just Command Byte important
+					else if(MSGCommTX==COMMPARAMFLASH)
+					{
+						nRF24_payloadTX[1] = MSGParameterTX;
+						nRF24_payloadTX[2] = 0;
+						nRF24_payloadTX[3] = 0;
+						nRF24_payloadTX[4] = 0;
+						nRF24_payloadTX[5] = 0;
+						nRF24_payloadTX[6] = 0;
+						nRF24_payloadTX[7] = 0;
+					}
+					else
 					{
 						nRF24_payloadTX[1] = 0;
 						nRF24_payloadTX[2] = 0;
@@ -981,8 +996,6 @@ void SysTick_Handler(void)
 						nRF24_payloadTX[6] = 0;
 						nRF24_payloadTX[7] = 0;
 					}
-
-					MSGCommTX=COMMCONTROLDATA;//reset to normal control data
 
 					// Transmit a packet
 					nRF24_TransmitPacket(nRF24_payloadTX, 8);
@@ -1016,6 +1029,8 @@ void SysTick_Handler(void)
 
 			MSGCommRX=nRF24_payloadRX[0];
 
+			if(MSGCommTX!=COMMCONTROLDATA && MSGCommRX!=COMMCONTROLDATA)MSGCommTX=COMMCONTROLDATA;//reset, return message wasn't control data
+
 			if(MSGCommRX==COMMCONTROLDATA) //Drone status
 			{
 				DroneBattLowerByte=nRF24_payloadRX[1];
@@ -1034,9 +1049,11 @@ void SysTick_Handler(void)
 			}
 			else if(MSGCommRX==COMMPARAMACTIVE || MSGCommRX==COMMPARAMFLASH)
 			{
-				MSGParameterRX=nRF24_payloadTX[1]; //Get parameter
+				MSGParameterRX=nRF24_payloadRX[1]; //Get parameter
 
-				MSGParamDataRX=(nRF24_payloadTX[2]<<24) + (nRF24_payloadTX[3]<<16) + (nRF24_payloadTX[4]<<8) + (nRF24_payloadTX[5]); //get data
+				LED4blinkcount=LEDSHORTBLINK;
+
+				MSGParamDataRX=(nRF24_payloadRX[2]<<24) + (nRF24_payloadRX[3]<<16) + (nRF24_payloadRX[4]<<8) + (nRF24_payloadRX[5]); //get data
 
 				switch (MSGParameterRX)
 				{
@@ -1063,8 +1080,14 @@ void SysTick_Handler(void)
 				}
 
 				if(MSGCommRX==COMMPARAMACTIVE)DroneDataActive=DroneDataTemp; //Parameters are active ones
-				else DroneDataFlash=DroneDataTemp; 								 //Parameters are from Flash
+				else
+				{
+					DroneDataFlash=DroneDataTemp; //Save Parameters from Flash
+					DroneDataInput=DroneDataTemp; //Set Parameters from flash to preset for setting new parameters
+				}
 			}
+			else if(MSGCommRX==COMMERASEFLASHDR || MSGCommRX==COMMWRITEFLASHDR)LED4blinkcount=LEDLONGBLINK;
+
 			TotalMSGrecv++;
 			MSGcount++;
 		 }

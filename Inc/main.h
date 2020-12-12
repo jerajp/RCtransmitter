@@ -68,6 +68,10 @@ extern "C" {
 
 #define TRIMJOYSTEP 5
 
+//LED blink constant
+#define LEDSHORTBLINK 250
+#define LEDLONGBLINK  2000
+
 //WIfi message type selector
 #define DRONEDATARETURN	0
 #define COMMERASEFLASH  1

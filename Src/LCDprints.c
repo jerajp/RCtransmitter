@@ -87,12 +87,12 @@ void MenuScreen1Print(char *buffer, CursorPositions pos)
 	  else sprintf(buffer," RC status");
 	  LCD_print(buffer,1,1);
 
-	  if(pos==Line2) sprintf(buffer,"*FlashDataRd");
-	  else sprintf(buffer," FlashDataRd");
+	  if(pos==Line2) sprintf(buffer,"*RCviewFlData");
+	  else sprintf(buffer," RCviewFlData");
 	  LCD_print(buffer,1,2);
 
-	  if(pos==Line3)  sprintf(buffer,"*FlashDataWr");
-	  else sprintf(buffer," FlashDataWr");
+	  if(pos==Line3)  sprintf(buffer,"*RCsetFlData");
+	  else sprintf(buffer," RCsetFlData");
 	  LCD_print(buffer,1,3);
 
 	  if(pos==Line4)  sprintf(buffer,"*Commands");
@@ -188,6 +188,9 @@ void TestScreen1Print(char *buffer)
 
 	  sprintf(buffer,"watch4 %d",watch4);
 	  LCD_print(buffer,0,4);
+
+	  sprintf(buffer,"watch5 %d",watch5);
+	  LCD_print(buffer,0,5);
 }
 
 void FlashDataScreenRdPrint(char *buffer)
@@ -238,12 +241,12 @@ void CommandScreen1Print(char *buffer, CursorPositions pos)
 	else sprintf(buffer," NRF24 TX=%d",CommShtdownnrf24);
 	LCD_print(buffer,1,0);
 
-	if(pos==Line1)  sprintf(buffer,"*WriteFlData");
-	else sprintf(buffer," WriteFlData");
+	if(pos==Line1)  sprintf(buffer,"*WriteFlRC");
+	else sprintf(buffer," WriteFlRC");
 	LCD_print(buffer,1,1);
 
-	if(pos==Line2)  sprintf(buffer,"*EraseFlData");
-	else sprintf(buffer," EraseFlData");
+	if(pos==Line2)  sprintf(buffer,"*EraseFlRC");
+	else sprintf(buffer," EraseFlRC");
 	LCD_print(buffer,1,2);
 
 	if(pos==Line3)  sprintf(buffer,"*WriteFlDrone");
@@ -329,7 +332,7 @@ void Param3TuneScreenPrint(char *buffer, CursorPositions pos)
 	LCD_print(buffer,1,2);
 
 	if(pos==Line3) sprintf(buffer,"*T:%.4f     ",DroneDataInput.pid_d_gain_pitch);
-	else sprintf(buffer,"T:%.4f     ",DroneDataInput.pid_d_gain_pitch);
+	else sprintf(buffer," T:%.4f     ",DroneDataInput.pid_d_gain_pitch);
 	LCD_print(buffer,1,3);
 
 	if(pos==Line4) sprintf(buffer,"*R:%.4f     ",DroneDataActive.pid_d_gain_pitch);
@@ -337,7 +340,7 @@ void Param3TuneScreenPrint(char *buffer, CursorPositions pos)
 	LCD_print(buffer,1,4);
 
 	if(pos==Line5) sprintf(buffer,"*F:%.4f     ",DroneDataFlash.pid_d_gain_pitch);
-	else sprintf(buffer,"F:%.4f     ",DroneDataFlash.pid_d_gain_pitch);
+	else sprintf(buffer," F:%.4f     ",DroneDataFlash.pid_d_gain_pitch);
 	LCD_print(buffer,1,5);
 }
 void Param4TuneScreenPrint(char *buffer, CursorPositions pos)

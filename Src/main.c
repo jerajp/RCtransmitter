@@ -61,13 +61,7 @@ uint32_t test3;
 uint32_t test4;
 uint32_t wifiOK;
 
-uint32_t watch1;
-uint32_t watch2;
-uint32_t watch3;
-uint32_t watch4;
-uint32_t watch5;
-uint32_t watch6;
-
+uint32_t watch1,watch2,watch3,watch4,watch5,watch6;
 
 char stringlcdBuffer[20];
 uint16_t adcDataArray[7];
@@ -261,9 +255,6 @@ int main(void)
   //MCP23017 intit
   mcp23017_init(&hi2c2,MCP23017_ADDRESS_20);
 
-
-  //TESTING
-  //writeFlashData(FLASHCONSTADDR);
 
   MainInitDoneFlag=1;
 
@@ -537,203 +528,243 @@ int main(void)
 		  	  }break;
 
 			  case Param1TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_pitch+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_pitch+=DroneTuneStep;
+					  	  	  	  	  	  if(DroneDataInput.pid_p_gain_pitch > MAXREGPARAM )DroneDataInput.pid_p_gain_pitch=MAXREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM1;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_pitch > MAXREGPARAM )DroneDataInput.pid_p_gain_pitch=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM1;
 
 			  	  	  	  	  	  	}break;
 			  case Param2TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_pitch+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_pitch+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_pitch > MAXREGPARAM)DroneDataInput.pid_i_gain_pitch=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM2;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_pitch > MAXREGPARAM)DroneDataInput.pid_i_gain_pitch=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM2;
 
 			  	  	  	  	  	  	}break;
 			  case Param3TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_pitch+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_pitch+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_pitch > MAXREGPARAM)DroneDataInput.pid_d_gain_pitch=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM3;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_pitch > MAXREGPARAM)DroneDataInput.pid_d_gain_pitch=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM3;
 
 			  	  	  	  	  	  	}break;
 			  case Param4TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_roll+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_roll+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_p_gain_roll > MAXREGPARAM)DroneDataInput.pid_p_gain_roll=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM4;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_roll > MAXREGPARAM)DroneDataInput.pid_p_gain_roll=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM4;
 
 			  	  	  	  	  	  	}break;
 			  case Param5TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_roll+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_roll+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_roll > MAXREGPARAM)DroneDataInput.pid_i_gain_roll=MAXREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM5;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_roll > MAXREGPARAM)DroneDataInput.pid_i_gain_roll=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM5;
 
 			  	  	  	  	  	  	}break;
 			  case Param6TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_roll+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_roll+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_roll > MAXREGPARAM)DroneDataInput.pid_d_gain_roll=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM6;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_roll > MAXREGPARAM)DroneDataInput.pid_d_gain_roll=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM6;
 
 			  	  	  	  	  	  	}break;
 			  case Param7TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_p_gain_yaw > MAXREGPARAM)DroneDataInput.pid_p_gain_yaw=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM7;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_yaw > MAXREGPARAM)DroneDataInput.pid_p_gain_yaw=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM7;
 
 			  	  	  	  	  	  	}break;
 			  case Param8TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_yaw > MAXREGPARAM)DroneDataInput.pid_i_gain_yaw=MAXREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM8;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_yaw > MAXREGPARAM)DroneDataInput.pid_i_gain_yaw=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM8;
 
 			  	  	  	  	  	  	}break;
 			  case Param9TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_yaw+=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_yaw > MAXREGPARAM)DroneDataInput.pid_d_gain_yaw=MAXREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM9;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_yaw > MAXREGPARAM)DroneDataInput.pid_d_gain_yaw=MAXREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM9;
 
 			  	  	  	  	  	  	}break;
 			  case Param10TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_pitch+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_pitch+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_pitch > MAXPIDPARAM)DroneDataInput.pid_max_pitch=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM10;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_pitch > MAXPIDPARAM)DroneDataInput.pid_max_pitch=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM10;
 
 			  	  	  	  	  	  	 }break;
 			  case Param11TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_pitch+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_pitch+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_pitch > MAXPIDPARAM)DroneDataInput.pid_i_max_pitch=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM11;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_pitch > MAXPIDPARAM)DroneDataInput.pid_i_max_pitch=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM11;
 
 			  	  	  	  	  	  	 }break;
 			  case Param12TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_roll+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_roll+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_roll > MAXPIDPARAM)DroneDataInput.pid_max_roll=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM12;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_roll > MAXPIDPARAM)DroneDataInput.pid_max_roll=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM12;
 
 			  	  	  	  	  	  	 }break;
 			  case Param13TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_roll+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_roll+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_roll > MAXPIDPARAM)DroneDataInput.pid_i_max_roll=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM13;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_roll > MAXPIDPARAM)DroneDataInput.pid_i_max_roll=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM13;
 
 			  	  	  	  	  	  	 }break;
 			  case Param14TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_yaw+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_yaw+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_yaw > MAXPIDPARAM)DroneDataInput.pid_max_yaw=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM14;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_yaw > MAXPIDPARAM)DroneDataInput.pid_max_yaw=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM14;
 
 			  	  	  	  	  	  	 }break;
 			  case Param15TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_yaw+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_yaw+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_yaw > MAXPIDPARAM)DroneDataInput.pid_i_max_yaw=MAXPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM15;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_yaw > MAXPIDPARAM)DroneDataInput.pid_i_max_yaw=MAXPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM15;
 
 			  	  	  	  	  	  	 }break;
 			  case Param16TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxpitchdegree+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxpitchdegree+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxpitchdegree > MAXDEGREEPARAM)DroneDataInput.maxpitchdegree=MAXDEGREEPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM16;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxpitchdegree > MAXDEGREEPARAM)DroneDataInput.maxpitchdegree=MAXDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM16;
 
 			  	  	  	  	  	  	 }break;
 			  case Param17TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxrolldegree+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxrolldegree+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxrolldegree > MAXDEGREEPARAM)DroneDataInput.maxrolldegree=MAXDEGREEPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM17;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxrolldegree > MAXDEGREEPARAM)DroneDataInput.maxrolldegree=MAXDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM17;
 
 			  	  	  	  	  	  	 }break;
 			  case Param18TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxyawdegree+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxyawdegree+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxyawdegree > MAXDEGREEPARAM)DroneDataInput.maxyawdegree=MAXDEGREEPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM18;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxyawdegree > MAXDEGREEPARAM)DroneDataInput.maxyawdegree=MAXDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM18;
 
 			  	  	  	  	  	  	 }break;
 			  case Param19TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.minthrottle+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.minthrottle+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.minthrottle > MAXTHROTTLE)DroneDataInput.minthrottle=MAXTHROTTLE;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM19;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.minthrottle > MAXTHROTTLE)DroneDataInput.minthrottle=MAXTHROTTLE;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM19;
 
 			  	  	  	  	  	  	 }break;
 			  case Param20TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxthrottle+=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxthrottle+=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxthrottle > MAXTHROTTLE)DroneDataInput.maxthrottle=MAXTHROTTLE;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM20;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt*=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxthrottle > MAXTHROTTLE)DroneDataInput.maxthrottle=MAXTHROTTLE;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM20;
 
 			  	  	  	  	  	     }break;
 		  }
@@ -766,203 +797,243 @@ int main(void)
 		  	  }break;
 
 			  case Param1TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_p_gain_pitch < MINREGPARAM )DroneDataInput.pid_p_gain_pitch=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM1;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_pitch < MINREGPARAM )DroneDataInput.pid_p_gain_pitch=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM1;
 
 			  	  	  	  	  	  	}break;
 			  case Param2TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_pitch < MINREGPARAM)DroneDataInput.pid_i_gain_pitch=MINREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM2;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_pitch > MINREGPARAM)DroneDataInput.pid_i_gain_pitch=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM2;
 
 			  	  	  	  	  	  	}break;
 			  case Param3TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_pitch-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_pitch < MINREGPARAM)DroneDataInput.pid_d_gain_pitch=MINREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM3;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_pitch > MINREGPARAM)DroneDataInput.pid_d_gain_pitch=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM3;
 
 			  	  	  	  	  	  	}break;
 			  case Param4TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_roll-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_roll-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_p_gain_roll < MINREGPARAM)DroneDataInput.pid_p_gain_roll=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM4;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_roll > MINREGPARAM)DroneDataInput.pid_p_gain_roll=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM4;
 
 			  	  	  	  	  	  	}break;
 			  case Param5TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_roll-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_roll-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_roll < MINREGPARAM)DroneDataInput.pid_i_gain_roll=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM5;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_roll > MINREGPARAM)DroneDataInput.pid_i_gain_roll=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM5;
 
 			  	  	  	  	  	  	}break;
 			  case Param6TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_roll-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_roll-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_roll < MINREGPARAM)DroneDataInput.pid_d_gain_roll=MINREGPARAM;
+
+					  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
+					  	  	  	  	  	  MSGParameterTX=PARAM6;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_roll > MINREGPARAM)DroneDataInput.pid_d_gain_roll=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM6;
 
 			  	  	  	  	  	  	}break;
 			  case Param7TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_p_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_p_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_p_gain_yaw < MINREGPARAM)DroneDataInput.pid_p_gain_yaw=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM7;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_p_gain_yaw > MINREGPARAM)DroneDataInput.pid_p_gain_yaw=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM7;
 
 			  	  	  	  	  	  	}break;
 			  case Param8TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_gain_yaw < MINREGPARAM)DroneDataInput.pid_i_gain_yaw=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM8;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_gain_yaw > MINREGPARAM)DroneDataInput.pid_i_gain_yaw=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM8;
 
 			  	  	  	  	  	  	}break;
 			  case Param9TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_d_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_d_gain_yaw-=DroneTuneStep;
+				  	  	  	  	  		  if(DroneDataInput.pid_d_gain_yaw < MINREGPARAM)DroneDataInput.pid_d_gain_yaw=MINREGPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM9;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStep/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_d_gain_yaw > MINREGPARAM)DroneDataInput.pid_d_gain_yaw=MINREGPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM9;
 
 			  	  	  	  	  	  	}break;
 			  case Param10TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_pitch-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_pitch-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_pitch < MINPIDPARAM)DroneDataInput.pid_max_pitch=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM10;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_pitch > MINPIDPARAM)DroneDataInput.pid_max_pitch=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM10;
 
 			  	  	  	  	  	  	 }break;
 			  case Param11TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_pitch-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_pitch-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_pitch < MINPIDPARAM)DroneDataInput.pid_i_max_pitch=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM11;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_pitch > MINPIDPARAM)DroneDataInput.pid_i_max_pitch=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM11;
 
 			  	  	  	  	  	  	 }break;
 			  case Param12TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_roll-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_roll-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_roll < MINPIDPARAM)DroneDataInput.pid_max_roll=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM12;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_roll > MINPIDPARAM)DroneDataInput.pid_max_roll=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM12;
 
 			  	  	  	  	  	  	 }break;
 			  case Param13TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_roll-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_roll-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_roll < MINPIDPARAM)DroneDataInput.pid_i_max_roll=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM13;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_roll > MINPIDPARAM)DroneDataInput.pid_i_max_roll=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM13;
 
 			  	  	  	  	  	  	 }break;
 			  case Param14TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_max_yaw-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_max_yaw-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_max_yaw < MINPIDPARAM)DroneDataInput.pid_max_yaw=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM14;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_max_yaw > MINPIDPARAM)DroneDataInput.pid_max_yaw=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM14;
 
 			  	  	  	  	  	  	 }break;
 			  case Param15TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.pid_i_max_yaw-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.pid_i_max_yaw-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.pid_i_max_yaw < MINPIDPARAM)DroneDataInput.pid_i_max_yaw=MINPIDPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM15;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.pid_i_max_yaw > MINPIDPARAM)DroneDataInput.pid_i_max_yaw=MINPIDPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM15;
 
 			  	  	  	  	  	  	 }break;
 			  case Param16TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxpitchdegree-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxpitchdegree-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxpitchdegree < MINDEGREEPARAM)DroneDataInput.maxpitchdegree=MINDEGREEPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM16;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxpitchdegree > MINDEGREEPARAM)DroneDataInput.maxpitchdegree=MINDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM16;
 
 			  	  	  	  	  	  	 }break;
 			  case Param17TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxrolldegree-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxrolldegree-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxrolldegree < MINDEGREEPARAM)DroneDataInput.maxrolldegree=MINDEGREEPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM17;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxrolldegree > MINDEGREEPARAM)DroneDataInput.maxrolldegree=MINDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM17;
 
 			  	  	  	  	  	  	 }break;
 			  case Param18TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxyawdegree-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxyawdegree-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxyawdegree < MINDEGREEPARAM)DroneDataInput.maxyawdegree=MINDEGREEPARAM;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM18;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxyawdegree > MINDEGREEPARAM)DroneDataInput.maxyawdegree=MINDEGREEPARAM;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM18;
 
 			  	  	  	  	  	  	 }break;
 			  case Param19TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.minthrottle-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.minthrottle-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.minthrottle < MINTHROTTLE)DroneDataInput.minthrottle=MINTHROTTLE;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM19;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.minthrottle > MINTHROTTLE)DroneDataInput.minthrottle=MINTHROTTLE;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM19;
 
 			  	  	  	  	  	  	 }break;
 			  case Param20TuneScreen:{
-				  	  	  	  	  	  if(CurrentCursorPos!=Line1)DroneDataInput.maxthrottle-=DroneTuneStepInt;
+				  	  	  	  	  	  if(CurrentCursorPos!=Line1)
+				  	  	  	  	  	  {
+				  	  	  	  	  		  DroneDataInput.maxthrottle-=DroneTuneStepInt;
+				  	  	  	  	  		  if(DroneDataInput.maxthrottle < MINTHROTTLE)DroneDataInput.maxthrottle=MINTHROTTLE;
+
+				  	  	  	  	  		  MSGCommTX=COMMPARAMACTIVE;
+				  	  	  	  	  		  MSGParameterTX=PARAM20;
+				  	  	  	  	  	  }
 				  	  	  	  	  	  else DroneTuneStepInt/=10;
-
-				  	  	  	  	  	  if(DroneDataInput.maxthrottle > MINTHROTTLE)DroneDataInput.maxthrottle=MINTHROTTLE;
-
-				  	  	  	  	  	  MSGCommTX=COMMPARAMACTIVE;
-				  	  	  	  	  	  MSGParameterTX=PARAM20;
 
 			  	  	  	  	  	     }break;
 		  }
