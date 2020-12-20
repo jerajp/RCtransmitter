@@ -241,7 +241,7 @@ int main(void)
   nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
 
   // Set TX power
-  nRF24_SetTXPower(nRF24_TXPWR_6dBm);
+  nRF24_SetTXPower(nRF24_TXPWR_18dBm);
 
   // Set operational mode (PTX == transmitter)
   nRF24_SetOperationalMode(nRF24_MODE_TX);
