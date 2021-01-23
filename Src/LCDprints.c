@@ -69,10 +69,10 @@ void MainScreenPrint(char *buffer)
 	  	  sprintf(buffer,"DR: %u mV",DroneBattmV);
 	  	  LCD_print(buffer,0,2);
 
-	  	  sprintf(buffer,"Pitch: %d ",DronePitchAngle);
+	  	  sprintf(buffer,"Pitch: %d     ",DronePitchAngle);
 	  	  LCD_print(buffer,0,3);
 
-	  	  sprintf(buffer,"Roll: %d ",DroneRollAngle);
+	  	  sprintf(buffer,"Roll: %d     ",DroneRollAngle);
 	  	  LCD_print(buffer,0,4);
 
 }
