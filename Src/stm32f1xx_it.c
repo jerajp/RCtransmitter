@@ -879,12 +879,12 @@ void SysTick_Handler(void)
  //Save Buttons into 8bits
  Buttons=(TOGG1statusdebounce<<7) +  (TOGG2statusdebounce<<6) + (TOGG3statusdebounce<<5) + (TOGG4statusdebounce<<4) + (TOGG5statusdebounce<<3) + (TOGG6statusdebounce<<2) + (0<<1) + 0;
 
- //Buzzer
- if( Batt1cellAVG < MINREMOTEBATT) BuzzerRCBattpanic=1;
- else BuzzerRCBattpanic=0;
+ //Buzzer OFF
+ //if( Batt1cellAVG < MINREMOTEBATT) BuzzerRCBattpanic=1;
+ //else BuzzerRCBattpanic=0;
 
- if(DroneBattmV < MINDRONEBATT && ConnectWeakFlag==0)BuzzerDroneBattpanic=1;
- else BuzzerDroneBattpanic=0;
+ //if(DroneBattmV < MINDRONEBATT && ConnectWeakFlag==0)BuzzerDroneBattpanic=1;
+ //else BuzzerDroneBattpanic=0;
 
  if(BuzzerRCBattpanic)
  {
